@@ -1,21 +1,18 @@
-import { type AppType } from "next/app";
-import { type Session } from "next-auth";
-import { SessionProvider } from "next-auth/react";
-import { CacheProvider } from "@emotion/react";
+import { ThemeProvider } from "@mui/material";
 import {
   createTheme,
   responsiveFontSizes,
   StyledEngineProvider,
 } from "@mui/material/styles";
-import { Box, Container, ThemeProvider } from "@mui/material";
-import { api } from "../utils/api";
+import type { NextComponentType } from "next";
+import { type Session } from "next-auth";
+import { SessionProvider, useSession } from "next-auth/react";
+import type { AppProps } from "next/app";
+import { type AppType } from "next/app";
+import React from "react";
+import MainLayout from "../components/MainLayout";
 import "../styles/globals.css";
-
-// function createEmotionCache() {
-//   return createCache({ key: "css", prepend: true });
-// }
-
-// const clientSideEmotionCache = createEmotionCache();
+import { api } from "../utils/api";
 
 let theme = createTheme({
   palette: {
@@ -56,22 +53,46 @@ let theme = createTheme({
 });
 theme = responsiveFontSizes(theme);
 
-const MyApp: AppType<{ session: Session | null }> = ({
+type ExtendedAppProps<P> = AppProps<P> & {
+  Component: NextComponentType & {
+    auth?: boolean;
+  };
+  pageProps: P & {
+    session: Session | null;
+  };
+};
+
+function MyApp<P>({
   Component,
   pageProps: { session, ...pageProps },
-}) => {
+}: ExtendedAppProps<P>) {
   return (
     <StyledEngineProvider injectFirst>
       <ThemeProvider theme={theme}>
-        <Box className="h-screen w-screen" bgcolor="grey.900" color="grey.50">
-          <SessionProvider session={session}>
-            <Component {...pageProps} />
-          </SessionProvider>
-        </Box>
-        {/* <CacheProvider value={clientSideEmotionCache}></CacheProvider> */}
+        <SessionProvider session={session}>
+          <MainLayout>
+            {Component.auth ? (
+              <Auth>
+                <Component {...pageProps} />
+              </Auth>
+            ) : (
+              <Component {...pageProps} />
+            )}
+          </MainLayout>
+        </SessionProvider>
       </ThemeProvider>
     </StyledEngineProvider>
   );
-};
+}
+
+function Auth({ children }: { children: React.ReactElement }) {
+  const { status } = useSession({ required: true });
+
+  if (status === "loading") {
+    return <></>;
+  }
+
+  return children;
+}
 
 export default api.withTRPC(MyApp);

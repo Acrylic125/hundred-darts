@@ -5,87 +5,43 @@ import {
   InputBase,
   List,
   ListItemButton,
-  Modal,
   Stack,
-  TextField,
   Typography,
 } from "@mui/material";
-import type { DartBoard } from "@prisma/client";
 import { useState } from "react";
+import { api } from "../utils/api";
+import CreateDartBoardModal from "./CreateDartBoardModal";
 
-const DashboardSidebar = ({ dartBoards }: { dartBoards: DartBoard[] }) => {
+const DashboardSidebar = ({ userId }: { userId: string }) => {
+  const utils = api.useContext();
   const [createDartBoardModal, setCreateDartBoardModal] = useState(false);
+  const { data: dartBoards } = api.dart.getAllDartBoards.useQuery({
+    userId,
+  });
+  const { mutateAsync: createDartBoard, isLoading: createDartBoardIsLoading } =
+    api.dart.createDartBoard.useMutation({
+      onSuccess: async () => {
+        await utils.dart.getAllDartBoards.invalidate();
+      },
+    });
 
   return (
     <Container maxWidth="xl">
-      <Modal
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
+      <CreateDartBoardModal
         open={createDartBoardModal}
+        loading={createDartBoardIsLoading}
         onClose={() => {
           setCreateDartBoardModal(false);
         }}
-        aria-labelledby="Create Dart Board"
-        aria-describedby="Modal to create a dart board"
-      >
-        <Stack
-          sx={({ palette, spacing }) => ({
-            width: "80%",
-            maxWidth: 720,
-            overflow: "auto",
-            backgroundColor: "grey.900",
-            color: "grey.50",
-            borderTopWidth: 10,
-            borderTopStyle: "solid",
-            borderColor: palette.primary.main,
-            borderRadius: 2,
-            padding: spacing(4, 4),
-          })}
-          direction="column"
-          gap={4}
-        >
-          <Typography
-            sx={{
-              fontWeight: "bold",
-            }}
-            variant="h4"
-            component="h2"
-          >
-            Create Dart Board
-          </Typography>
-          <Stack gap={1} direction="column">
-            <Typography variant="body1" component="p" color="grey.300">
-              Name the dart board
-            </Typography>
-            <TextField
-              placeholder="Dart Board Name"
-              name="Dart Board Name"
-              fullWidth
-            />
-          </Stack>
-          <Stack direction="row" gap={1}>
-            <Button variant="contained" size="large">
-              <Typography variant="body1" component="p">
-                Create
-              </Typography>
-            </Button>
-            <Button
-              onClick={() => {
-                setCreateDartBoardModal(false);
-              }}
-              variant="text"
-              size="large"
-            >
-              <Typography variant="body1" component="p">
-                Cancel
-              </Typography>
-            </Button>
-          </Stack>
-        </Stack>
-      </Modal>
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        onCreate={async ({ name }) => {
+          await createDartBoard({
+            name,
+            userId,
+          });
+          setCreateDartBoardModal(false);
+        }}
+      />
       <Stack gap={1} direction="column">
         <Stack
           direction="row"
@@ -133,11 +89,19 @@ const DashboardSidebar = ({ dartBoards }: { dartBoards: DartBoard[] }) => {
         </Box>
         {dartBoards !== undefined && dartBoards.length > 0 ? (
           <List>
-            <ListItemButton selected>
-              <Typography variant="body1" component="p">
-                Hello
-              </Typography>
-            </ListItemButton>
+            {dartBoards
+              .sort((a, b) => {
+                return b.createdAt.getTime() - a.createdAt.getTime();
+              })
+              .map((dartBoard) => {
+                return (
+                  <ListItemButton key={dartBoard.id}>
+                    <Typography variant="body1" component="p">
+                      {dartBoard.name}
+                    </Typography>
+                  </ListItemButton>
+                );
+              })}
           </List>
         ) : (
           <Typography variant="body1" component="p">

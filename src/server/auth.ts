@@ -37,6 +37,11 @@ declare module "next-auth" {
  **/
 export const authOptions: NextAuthOptions = {
   callbacks: {
+    // signIn: ({ user, account, profile }) => {
+    //   console.log("signIn", user, account, profile);
+
+    //   return false;
+    // },
     session({ session, user }) {
       if (session.user) {
         session.user.id = user.id;
@@ -45,9 +50,32 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
+  pages: {
+    signIn: "/auth/signin",
+    // signOut: "/auth/signout",
+    // error: "/auth/error", // Error code passed in query string as ?error=
+    // verifyRequest: "/auth/verify-request", // (used for check email message)
+    // newUser: "/auth/new-user", // New users will be directed here on first sign in (leave the property out if not of interest)
+  },
   adapter: PrismaAdapter(prisma),
-  // secret: env.NEXTAUTH_SECRET,
   providers: [
+    // CredentialsProvider({
+    //   name: "Credentials",
+    //   credentials: {
+    //     username: { label: "Username", type: "text", placeholder: "jsmith" },
+    //     password: { label: "Password", type: "password" },
+    //   },
+    //   // eslint-disable-next-line @typescript-eslint/require-await
+    //   authorize: async (credentials, req) => {
+    //     const user = { id: "1", name: "J Smith", email: "jsmith@example.com" };
+
+    //     if (user) {
+    //       return user;
+    //     } else {
+    //       return null;
+    //     }
+    //   },
+    // }),
     GoogleProvider({
       clientId: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,

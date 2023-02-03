@@ -1,19 +1,7 @@
 // import { Test } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-
-import {
-  createTRPCRouter,
-  publicProcedure,
-  protectedProcedure,
-  t,
-} from "../trpc";
-
-// const dartProcedure = protectedProcedure.use(
-//   t.middleware(async ({ ctx, input, next }) => {
-
-//   })
-// );
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const dartRouter = createTRPCRouter({
   createDart: protectedProcedure

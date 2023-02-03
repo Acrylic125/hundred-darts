@@ -5,14 +5,6 @@ import { api } from "../utils/api";
 
 const Home: NextPage = () => {
   const { data, status } = useSession();
-  const { data: dartBoards } = api.dart.getAllDartBoards.useQuery(
-    {
-      userId: data?.user?.id || "",
-    },
-    {
-      enabled: status === "authenticated" && data?.user !== undefined,
-    }
-  );
 
   return <></>;
 };

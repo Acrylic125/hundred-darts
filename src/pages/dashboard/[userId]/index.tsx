@@ -1,32 +1,10 @@
-import {
-  Box,
-  Button,
-  Container,
-  InputBase,
-  List,
-  ListItemButton,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { type NextPage } from "next";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import DashboardSidebar from "../../../components/DashboardSidebar";
-import { api } from "../../../utils/api";
 
 const Dashboard = () => {
   const { data, status } = useSession();
   const router = useRouter();
-  const { data: dartBoards } = api.dart.getAllDartBoards.useQuery(
-    {
-      userId: data?.user?.id || "",
-    },
-    {
-      enabled: status === "authenticated" && data?.user !== undefined,
-    }
-  );
 
   if (status === "loading") {
     return <></>;
@@ -41,7 +19,7 @@ const Dashboard = () => {
     return <></>;
   }
 
-  return <DashboardSidebar dartBoards={dartBoards || []} />;
+  return <DashboardSidebar userId={data?.user?.id || ""} />;
 };
 
 export default Dashboard;

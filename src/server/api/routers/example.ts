@@ -4,6 +4,10 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 
 export const exampleRouter = createTRPCRouter({
+  getAllUsers: publicProcedure.query(async ({ ctx }) => {
+    const users = await ctx.prisma.user.findMany();
+    return users;
+  }),
   hello: publicProcedure
     .input(z.object({ text: z.string() }))
     .query(({ input }) => {

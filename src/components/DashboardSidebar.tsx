@@ -58,18 +58,20 @@ const DashboardSidebar = ({
         }}
       />
       <Stack
-        sx={{
+        sx={({ spacing }) => ({
           position: "relative",
-        }}
+          paddingX: spacing(2),
+        })}
         gap={1}
         direction="column"
       >
         <Stack
-          sx={{
+          sx={({ spacing }) => ({
             position: "sticky",
+            paddingTop: spacing(4),
             top: 0,
             zIndex: 1,
-          }}
+          })}
           bgcolor="grey.900"
           gap={1}
           direction="column"
@@ -117,10 +119,11 @@ const DashboardSidebar = ({
             </Button>
           </Stack>
           <Box
-            sx={{
+            sx={({ shadows }) => ({
               backgroundColor: "grey.800",
               borderRadius: 2,
-            }}
+              boxShadow: shadows[4],
+            })}
           >
             <InputBase
               sx={({ spacing }) => ({
@@ -160,6 +163,19 @@ const DashboardSidebar = ({
             No dart boards found
           </Typography>
         )}
+        <Stack
+          sx={{
+            position: "sticky",
+            backgroundColor: "grey.900",
+            paddingY: 2,
+            bottom: 0,
+            zIndex: 1,
+          }}
+        >
+          <Typography variant="body1" component="h2">
+            {dartBoards?.length} Dart Boards
+          </Typography>
+        </Stack>
       </Stack>
     </Box>
   );

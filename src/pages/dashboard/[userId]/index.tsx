@@ -18,6 +18,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 
 const DartBoard = ({ dartBoardId }: { dartBoardId: string }) => {
+  const utils = api.useContext();
   const [dart, setDart] = useState("");
   const { data: dartBoard, isLoading: dartBoardIsLoading } =
     api.dart.getDartBoard.useQuery({
@@ -27,7 +28,13 @@ const DartBoard = ({ dartBoardId }: { dartBoardId: string }) => {
     api.dart.getAllDartsForBoard.useQuery({
       dartBoardId,
     });
-  const { mutateAsync: createDart } = api.dart.createDart.useMutation();
+  const { mutateAsync: createDart } = api.dart.createDart.useMutation({
+    onSuccess: async () => {
+      await utils.dart.getAllDartsForBoard.invalidate({
+        dartBoardId,
+      });
+    },
+  });
 
   return (
     <Stack direction="column" gap={2}>
@@ -45,11 +52,11 @@ const DartBoard = ({ dartBoardId }: { dartBoardId: string }) => {
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onSubmit={async (e) => {
           e.preventDefault();
+          setDart("");
           await createDart({
             dartBoardId,
             text: dart,
           });
-          setDart("");
         }}
       >
         <Stack direction="row" gap={1}>
@@ -77,15 +84,11 @@ const DartBoard = ({ dartBoardId }: { dartBoardId: string }) => {
           )}
         </Stack>
       </form>
-
       <Grid spacing={2} container>
         {dartsIsLoading ? (
           <>
             <Grid item xs={12}>
-              <Skeleton />
-            </Grid>
-            <Grid item xs={12}>
-              <Skeleton />
+              <Skeleton height={64} />
             </Grid>
           </>
         ) : (
@@ -98,7 +101,9 @@ const DartBoard = ({ dartBoardId }: { dartBoardId: string }) => {
                   borderRadius: 2,
                 }}
               >
-                {dart.text}
+                <Typography variant="body1" component="p">
+                  {dart.text}
+                </Typography>
               </Box>
             </Grid>
           ))
@@ -136,9 +141,9 @@ const Dashboard = () => {
   return (
     <Container maxWidth="xl">
       <Stack
-        sx={({ spacing }) => ({
-          padding: spacing(6, 4),
-        })}
+        // sx={({ spacing }) => ({
+        //   padding: spacing(6, 4),
+        // })}
         direction="row"
         gap={4}
       >
@@ -147,10 +152,11 @@ const Dashboard = () => {
             selectedDartBoardId={selectedDartBoardId}
             onSelectDartBoard={setSelectedDartBoardId}
             sx={({ breakpoints }) => ({
-              width: 280,
-              height: "100%",
+              width: 320,
+              height: "100vh",
+              overflowY: "auto",
               [breakpoints.up("lg")]: {
-                width: 340,
+                width: 360,
               },
             })}
             userId={data?.user?.id || ""}
@@ -167,34 +173,25 @@ const Dashboard = () => {
               setSmallVPSidebarCollapsed(true);
             }}
           >
-            <Box
-              sx={({ spacing }) => ({
+            <DashboardSidebar
+              collapsable
+              onCollapse={() => {
+                setSmallVPSidebarCollapsed(true);
+              }}
+              sx={() => ({
                 width: "70%",
-                maxHeight: "100vh",
+                height: "100vh",
+                overflowY: "auto",
                 backgroundColor: "grey.900",
-                padding: spacing(4, 4),
                 color: "grey.50",
               })}
-            >
-              <DashboardSidebar
-                collapsable
-                onCollapse={() => {
-                  setSmallVPSidebarCollapsed(true);
-                }}
-                sx={() => ({
-                  height: "100%",
-                  overflow: "auto",
-                  backgroundColor: "grey.900",
-                  color: "grey.50",
-                })}
-                userId={data?.user?.id || ""}
-              />
-            </Box>
+              userId={data?.user?.id || ""}
+            />
           </Modal>
         )}
         <Stack
           sx={{
-            flexGrow: 1,
+            width: "100%",
           }}
           direction="column"
         >

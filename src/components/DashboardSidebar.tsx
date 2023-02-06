@@ -1,7 +1,9 @@
+import { api } from "@/utils/api";
+import ClearIcon from "@mui/icons-material/Clear";
+import type { SxProps, Theme } from "@mui/material";
 import {
   Box,
   Button,
-  Container,
   InputBase,
   List,
   ListItemButton,
@@ -9,10 +11,23 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { api } from "../utils/api";
 import CreateDartBoardModal from "./CreateDartBoardModal";
 
-const DashboardSidebar = ({ userId }: { userId: string }) => {
+const DashboardSidebar = ({
+  sx,
+  selectedDartBoardId,
+  onSelectDartBoard,
+  collapsable,
+  onCollapse,
+  userId,
+}: {
+  sx?: SxProps<Theme>;
+  selectedDartBoardId?: string | null;
+  onSelectDartBoard?: (dartBoardId: string | null) => void;
+  collapsable?: boolean;
+  onCollapse?: () => void;
+  userId: string;
+}) => {
   const utils = api.useContext();
   const [createDartBoardModal, setCreateDartBoardModal] = useState(false);
   const { data: dartBoards } = api.dart.getAllDartBoards.useQuery({
@@ -26,7 +41,7 @@ const DashboardSidebar = ({ userId }: { userId: string }) => {
     });
 
   return (
-    <Container maxWidth="xl">
+    <Box sx={sx}>
       <CreateDartBoardModal
         open={createDartBoardModal}
         loading={createDartBoardIsLoading}
@@ -42,51 +57,82 @@ const DashboardSidebar = ({ userId }: { userId: string }) => {
           setCreateDartBoardModal(false);
         }}
       />
-      <Stack gap={1} direction="column">
+      <Stack
+        sx={{
+          position: "relative",
+        }}
+        gap={1}
+        direction="column"
+      >
         <Stack
-          direction="row"
-          gap={2}
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          <Typography
-            sx={{
-              fontWeight: "bold",
-              color: "grey.300",
-            }}
-            variant="body1"
-            component="h2"
-          >
-            Dart Boards
-          </Typography>
-          <Button
-            onClick={() => {
-              setCreateDartBoardModal(true);
-            }}
-            variant="contained"
-            color="primary"
-            size="medium"
-          >
-            Create
-          </Button>
-        </Stack>
-        <Box
           sx={{
-            backgroundColor: "grey.800",
+            position: "sticky",
+            top: 0,
+            zIndex: 1,
           }}
+          bgcolor="grey.900"
+          gap={1}
+          direction="column"
         >
-          <InputBase
-            sx={({ spacing }) => {
-              return {
+          {collapsable && (
+            <Box>
+              <Button
+                sx={{
+                  backgroundColor: "grey.800",
+                }}
+                onClick={() => {
+                  onCollapse?.();
+                }}
+                variant="contained"
+              >
+                <ClearIcon />
+              </Button>
+            </Box>
+          )}
+          <Stack
+            direction="row"
+            gap={2}
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Typography
+              sx={{
+                fontWeight: "bold",
+                color: "grey.300",
+              }}
+              variant="body1"
+              component="h2"
+            >
+              Dart Boards
+            </Typography>
+            <Button
+              onClick={() => {
+                setCreateDartBoardModal(true);
+              }}
+              variant="contained"
+              color="primary"
+              size="medium"
+            >
+              Create
+            </Button>
+          </Stack>
+          <Box
+            sx={{
+              backgroundColor: "grey.800",
+              borderRadius: 2,
+            }}
+          >
+            <InputBase
+              sx={({ spacing }) => ({
                 color: "grey.300",
                 padding: spacing(1, 2),
-              };
-            }}
-            placeholder="Search Dart Board"
-            name="Search Dart Board"
-            fullWidth
-          />
-        </Box>
+              })}
+              placeholder="Search Dart Board"
+              name="Search Dart Board"
+              fullWidth
+            />
+          </Box>
+        </Stack>
         {dartBoards !== undefined && dartBoards.length > 0 ? (
           <List>
             {dartBoards
@@ -95,7 +141,13 @@ const DashboardSidebar = ({ userId }: { userId: string }) => {
               })
               .map((dartBoard) => {
                 return (
-                  <ListItemButton key={dartBoard.id}>
+                  <ListItemButton
+                    key={dartBoard.id}
+                    onClick={() => {
+                      onSelectDartBoard?.(dartBoard.id);
+                    }}
+                    selected={selectedDartBoardId === dartBoard.id}
+                  >
                     <Typography variant="body1" component="p">
                       {dartBoard.name}
                     </Typography>
@@ -109,7 +161,7 @@ const DashboardSidebar = ({ userId }: { userId: string }) => {
           </Typography>
         )}
       </Stack>
-    </Container>
+    </Box>
   );
 };
 

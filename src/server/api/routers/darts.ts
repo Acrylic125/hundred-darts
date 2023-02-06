@@ -77,6 +77,37 @@ export const dartRouter = createTRPCRouter({
       });
       return darts;
     }),
+  getDartBoard: protectedProcedure
+    .input(
+      z.object({
+        dartBoardId: z.string(),
+        includeDarts: z.boolean().optional(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const dartBoardWithDarts = await ctx.prisma.dartBoard.findUnique({
+        where: {
+          id: input.dartBoardId,
+        },
+        include: {
+          Dart: input.includeDarts,
+        },
+      });
+      if (!dartBoardWithDarts) {
+        return null;
+      }
+
+      if (
+        !(
+          ctx.session &&
+          ctx.session.user &&
+          ctx.session.user.id === dartBoardWithDarts.userId
+        )
+      ) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+      return dartBoardWithDarts;
+    }),
   createDartBoard: protectedProcedure
     .input(
       z.object({

@@ -22,6 +22,9 @@
     "@trpc/next": "^10.9.0",
     "@trpc/react-query": "^10.9.0",
     "@trpc/server": "^10.9.0",
+    "axios": "^1.3.2",
+    "lexical": "^0.7.7",
+    "lodash": "^4.17.21",
     "next": "13.1.6",
     "next-auth": "^4.19.0",
     "react": "18.2.0",
@@ -30,6 +33,7 @@
     "zod": "^3.20.2"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.191",
     "@types/node": "^18.11.18",
     "@types/prettier": "^2.7.2",
     "@types/react": "^18.0.26",

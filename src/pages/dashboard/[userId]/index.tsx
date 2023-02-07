@@ -7,19 +7,113 @@ import {
   Modal,
   Skeleton,
   Stack,
-  TextField,
+  InputBase,
   Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
 import Grid from "@mui/material/Grid";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useRef, useState } from "react";
+
+const Dart = ({
+  content: _content,
+  onRequestEdit,
+  onRequestSave,
+  onRequestClose,
+  editMode,
+  autoFocusOnEdit,
+}: {
+  content: string;
+  onRequestEdit?: () => void;
+  onRequestSave?: (content: string) => void;
+  onRequestClose?: () => void;
+  editMode?: boolean;
+  autoFocusOnEdit?: boolean;
+}) => {
+  const [content, setContent] = useState(_content);
+  const editRef = useRef(null);
+
+  return (
+    <Box
+      onClick={() => {
+        onRequestEdit?.();
+      }}
+      sx={{
+        backgroundColor: "grey.800",
+        padding: 2,
+        borderRadius: 2,
+        borderWidth: editMode ? 2 : 0,
+        borderStyle: "dashed",
+        borderColor: "primary.500",
+      }}
+    >
+      {editMode ? (
+        <InputBase
+          autoFocus={autoFocusOnEdit}
+          inputRef={editRef}
+          defaultValue={_content}
+          onChange={(e) => {
+            setContent(e.target.value);
+          }}
+          value={content}
+          onFocus={(e) =>
+            e.currentTarget.setSelectionRange(
+              e.currentTarget.value.length,
+              e.currentTarget.value.length
+            )
+          }
+          onBlur={() => {
+            onRequestClose?.();
+            onRequestSave?.(content);
+          }}
+          sx={{
+            width: "100%",
+            height: "100%",
+            color: "white",
+          }}
+          multiline
+        />
+      ) : (
+        <Typography variant="body1" component="p">
+          {content || "Empty Dart"}
+        </Typography>
+      )}
+    </Box>
+  );
+};
+
+function useLocalIdRemap() {
+  const [localIdRemap, setLocalIdRemap] = useState<Map<string, string>>(
+    new Map()
+  );
+  const [localIdCounter, setLocalIdCounter] = useState(0);
+
+  return {
+    newLocalId: () => {
+      const newId = `local-${localIdCounter}`;
+      setLocalIdCounter((prev) => prev + 1);
+      return newId;
+    },
+    bindLocalId: (localId: string, remoteId: string) => {
+      setLocalIdRemap((prev) => {
+        const newMap = new Map(prev);
+        newMap.set(localId, remoteId);
+        return newMap;
+      });
+    },
+    getMappedId: (localId: string) => {
+      return localIdRemap.get(localId);
+    },
+  };
+}
 
 const DartBoard = ({ dartBoardId }: { dartBoardId: string }) => {
   const utils = api.useContext();
-  const [dart, setDart] = useState("");
+  const [edittedDartId, setEdittedDartId] = useState<string | null>(null);
   const { data: dartBoard, isLoading: dartBoardIsLoading } =
     api.dart.getDartBoard.useQuery({
       dartBoardId,
@@ -39,10 +133,11 @@ const DartBoard = ({ dartBoardId }: { dartBoardId: string }) => {
   return (
     <Stack direction="column" gap={2}>
       <Typography
-        sx={{
+        sx={({ spacing }) => ({
           width: "50%",
+          paddingTop: spacing(4),
           fontWeight: "bold",
-        }}
+        })}
         variant="h4"
         component="h1"
       >
@@ -52,10 +147,9 @@ const DartBoard = ({ dartBoardId }: { dartBoardId: string }) => {
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onSubmit={async (e) => {
           e.preventDefault();
-          setDart("");
           await createDart({
             dartBoardId,
-            text: dart,
+            text: "",
           });
         }}
       >
@@ -68,19 +162,52 @@ const DartBoard = ({ dartBoardId }: { dartBoardId: string }) => {
               }}
             />
           ) : (
-            <>
-              <TextField
-                name="Type out your dart here"
-                placeholder="Type out your dart here"
-                value={dart}
-                onChange={(e) => setDart(e.target.value)}
-                multiline
-                fullWidth
-              />
-              <Button variant="contained" type="submit">
-                <Typography variant="button">Add</Typography>
-              </Button>
-            </>
+            <Stack
+              sx={{
+                width: "100%",
+                borderBottom: "1px solid",
+                borderColor: "grey.700",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+              direction="row"
+            >
+              <Tabs value={0} aria-label="dashboard tabs">
+                <Tab
+                  sx={({ spacing }) => ({
+                    paddingY: spacing(3),
+                  })}
+                  label="All"
+                />
+                <Tab
+                  sx={({ spacing }) => ({
+                    paddingY: spacing(3),
+                  })}
+                  label="Group"
+                />
+              </Tabs>
+              <Stack direction="row" gap={1}>
+                <Box
+                  sx={() => ({
+                    backgroundColor: "grey.800",
+                    borderRadius: 2,
+                  })}
+                >
+                  <InputBase
+                    sx={({ spacing }) => ({
+                      color: "grey.300",
+                      padding: spacing(1, 2),
+                    })}
+                    placeholder="Search"
+                    name="Search"
+                    fullWidth
+                  />
+                </Box>
+                <Button variant="contained">
+                  <Typography variant="button">New Dart</Typography>
+                </Button>
+              </Stack>
+            </Stack>
           )}
         </Stack>
       </form>
@@ -94,17 +221,17 @@ const DartBoard = ({ dartBoardId }: { dartBoardId: string }) => {
         ) : (
           darts?.map((dart) => (
             <Grid key={dart.id} item xs={12} sm={6} lg={4}>
-              <Box
-                sx={{
-                  backgroundColor: "grey.800",
-                  padding: 2,
-                  borderRadius: 2,
+              <Dart
+                content={dart.text}
+                onRequestEdit={() => {
+                  setEdittedDartId(dart.id);
                 }}
-              >
-                <Typography variant="body1" component="p">
-                  {dart.text}
-                </Typography>
-              </Box>
+                onRequestClose={() => {
+                  setEdittedDartId(null);
+                }}
+                editMode={edittedDartId === dart.id}
+                autoFocusOnEdit
+              />
             </Grid>
           ))
         )}
@@ -140,13 +267,7 @@ const Dashboard = () => {
 
   return (
     <Container maxWidth="xl">
-      <Stack
-        // sx={({ spacing }) => ({
-        //   padding: spacing(6, 4),
-        // })}
-        direction="row"
-        gap={4}
-      >
+      <Stack direction="row" gap={4}>
         {isGreaterThanMd ? (
           <DashboardSidebar
             selectedDartBoardId={selectedDartBoardId}

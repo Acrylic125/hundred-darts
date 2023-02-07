@@ -111,6 +111,99 @@ function useLocalIdRemap() {
   };
 }
 
+const DartBoardLayout = ({
+  isLoading,
+  dartBoardName,
+  children,
+  extras,
+}: {
+  isLoading?: boolean;
+  dartBoardName?: string;
+  children: React.ReactNode;
+  extras?: React.ReactNode;
+}) => {
+  return (
+    <Stack direction="column" gap={2}>
+      <Typography
+        sx={({ spacing }) => ({
+          width: "50%",
+          paddingTop: spacing(4),
+          fontWeight: "bold",
+        })}
+        variant="h4"
+        component="h1"
+      >
+        {isLoading ? <Skeleton /> : dartBoardName}
+      </Typography>
+      <Stack direction="row" gap={1}>
+        {isLoading ? (
+          <Skeleton
+            sx={{
+              width: "100%",
+              height: 64,
+            }}
+          />
+        ) : (
+          <Stack
+            sx={{
+              width: "100%",
+              borderBottom: "1px solid",
+              borderColor: "grey.700",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+            direction="row"
+          >
+            <Tabs value={0} aria-label="dashboard tabs">
+              <Tab
+                sx={({ spacing }) => ({
+                  paddingY: spacing(3),
+                })}
+                label="All"
+              />
+              <Tab
+                sx={({ spacing }) => ({
+                  paddingY: spacing(3),
+                })}
+                label="Group"
+              />
+            </Tabs>
+            <Box>{extras}</Box>
+            {/* <Stack direction="row" gap={1}>
+              <Box
+                sx={() => ({
+                  backgroundColor: "grey.800",
+                  borderRadius: 2,
+                })}
+              >
+                <InputBase
+                  sx={({ spacing }) => ({
+                    color: "grey.300",
+                    padding: spacing(1, 2),
+                  })}
+                  placeholder="Search"
+                  name="Search"
+                  fullWidth
+                />
+              </Box>
+              <Button variant="contained">
+                <Typography variant="button">New Dart</Typography>
+              </Button>
+            </Stack> */}
+          </Stack>
+        )}
+      </Stack>
+      <Box>{children}</Box>
+    </Stack>
+  );
+};
+
+const AllDartsDartBoardContent = ({
+  dartBoardId,
+}: {
+  dartBoardId: string;
+}) => {};
+
 const DartBoard = ({ dartBoardId }: { dartBoardId: string }) => {
   const utils = api.useContext();
   const [edittedDartId, setEdittedDartId] = useState<string | null>(null);

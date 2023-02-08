@@ -1,16 +1,23 @@
-export default class EventSubscriber<T> {
-  private listeners: Set<(val: T) => void> = new Set();
+export type Listener<T> = (val: T) => void | Promise<void>;
 
-  public subscribe(listener: (val: T) => void): () => void {
+export default class EventSubscriber<T> {
+  private listeners: Set<Listener<T>> = new Set();
+
+  public subscribe(listener: Listener<T>) {
     this.listeners.add(listener);
-    return () => this.unsubscribe(listener);
+
+    const unsubscribe = () => this.unsubscribe(listener);
+
+    return {
+      unsubscribe,
+    };
   }
 
-  public unsubscribe(listener: (val: T) => void): void {
+  public unsubscribe(listener: Listener<T>): void {
     this.listeners.delete(listener);
   }
 
   public publish(val: T): void {
-    this.listeners.forEach((listener) => listener(val));
+    this.listeners.forEach((listener) => void listener(val));
   }
 }

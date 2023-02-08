@@ -1,23 +1,16 @@
+import { AllDartsContent, AllDartsExtras } from "@/components/AllDartsContent";
+import DartBoardLayout from "@/components/DartBoardLayout";
 import DashboardSidebar from "@/components/DashboardSidebar";
-import { api } from "@/utils/api";
 import {
-  Box,
-  Button,
   Container,
   Modal,
-  Skeleton,
   Stack,
-  InputBase,
-  Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
-import Grid from "@mui/material/Grid";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 function useLocalIdRemap() {
   const [localIdRemap, setLocalIdRemap] = useState<Map<string, string>>(
@@ -44,164 +37,6 @@ function useLocalIdRemap() {
   };
 }
 
-const AllDartsExtras = () => {
-  return (
-    <Stack direction="row" gap={1}>
-      <Stack direction="row" gap={1}>
-        <Box
-          sx={() => ({
-            backgroundColor: "grey.800",
-            borderRadius: 2,
-          })}
-        >
-          <InputBase
-            sx={({ spacing }) => ({
-              color: "grey.300",
-              padding: spacing(1, 2),
-            })}
-            placeholder="Search"
-            name="Search"
-            fullWidth
-          />
-        </Box>
-        <Button variant="contained">
-          <Typography variant="button">New Dart</Typography>
-        </Button>
-      </Stack>
-    </Stack>
-  );
-};
-
-const AllDartsContent = ({ dartBoardId }: { dartBoardId: string }) => {
-  const [edittedDartId, setEdittedDartId] = useState<string | null>(null);
-  const { data: darts, isLoading: dartsIsLoading } =
-    api.dart.getAllDartsForBoard.useQuery({
-      dartBoardId,
-    });
-  const { mutateAsync: createDart } = api.dart.createDart.useMutation({
-    // onSuccess: async () => {
-    //   await utils.dart.getAllDartsForBoard.invalidate({
-    //     dartBoardId,
-    //   });
-    // },
-  });
-  return (
-    <Grid spacing={2} container>
-      {dartsIsLoading ? (
-        <>
-          <Grid item xs={12}>
-            <Skeleton height={64} />
-          </Grid>
-        </>
-      ) : (
-        darts?.map((dart) => (
-          <Grid key={dart.id} item xs={12} sm={6} lg={4}>
-            <Dart
-              content={dart.text}
-              onRequestEdit={() => {
-                setEdittedDartId(dart.id);
-              }}
-              onRequestClose={() => {
-                setEdittedDartId(null);
-              }}
-              editMode={edittedDartId === dart.id}
-              autoFocusOnEdit
-            />
-          </Grid>
-        ))
-      )}
-    </Grid>
-  );
-};
-
-// const AllDartsDartBoardContent = ({ dartBoardId }: { dartBoardId: string }) => {
-//   const utils = api.useContext();
-//   const [edittedDartId, setEdittedDartId] = useState<string | null>(null);
-//   const { data: dartBoard, isLoading: dartBoardIsLoading } =
-//     api.dart.getDartBoard.useQuery({
-//       dartBoardId,
-//     });
-//   const { data: darts, isLoading: dartsIsLoading } =
-//     api.dart.getAllDartsForBoard.useQuery({
-//       dartBoardId,
-//     });
-//   const { mutateAsync: createDart } = api.dart.createDart.useMutation({
-//     // onSuccess: async () => {
-//     //   await utils.dart.getAllDartsForBoard.invalidate({
-//     //     dartBoardId,
-//     //   });
-//     // },
-//   });
-
-//   return (
-//     <DartBoardLayout
-//       defaultSelectedTab="all"
-//       dartBoardName={dartBoard?.name}
-//       isLoading={dartBoardIsLoading}
-//       extras={
-//         <Stack direction="row" gap={1}>
-//           {dartBoardIsLoading ? (
-//             <Skeleton
-//               sx={{
-//                 width: "100%",
-//                 height: 64,
-//               }}
-//             />
-//           ) : (
-//             <Stack direction="row" gap={1}>
-//               <Box
-//                 sx={() => ({
-//                   backgroundColor: "grey.800",
-//                   borderRadius: 2,
-//                 })}
-//               >
-//                 <InputBase
-//                   sx={({ spacing }) => ({
-//                     color: "grey.300",
-//                     padding: spacing(1, 2),
-//                   })}
-//                   placeholder="Search"
-//                   name="Search"
-//                   fullWidth
-//                 />
-//               </Box>
-//               <Button variant="contained">
-//                 <Typography variant="button">New Dart</Typography>
-//               </Button>
-//             </Stack>
-//           )}
-//         </Stack>
-//       }
-//     >
-//       <Grid spacing={2} container>
-//         {dartsIsLoading ? (
-//           <>
-//             <Grid item xs={12}>
-//               <Skeleton height={64} />
-//             </Grid>
-//           </>
-//         ) : (
-//           darts?.map((dart) => (
-//             <Grid key={dart.id} item xs={12} sm={6} lg={4}>
-//               <Dart
-//                 content={dart.text}
-//                 onRequestEdit={() => {
-//                   setEdittedDartId(dart.id);
-//                 }}
-//                 onRequestClose={() => {
-//                   setEdittedDartId(null);
-//                 }}
-//                 editMode={edittedDartId === dart.id}
-//                 autoFocusOnEdit
-//               />
-//             </Grid>
-//           ))
-//         )}
-//       </Grid>
-//     </DartBoardLayout>
-//   );
-// };
-
 const Dashboard = () => {
   const theme = useTheme();
   const isGreaterThanMd = useMediaQuery(theme.breakpoints.up("md"));
@@ -217,10 +52,6 @@ const Dashboard = () => {
   if (status === "loading") {
     return <></>;
   }
-  // if (status !== "authenticated") {
-  //   void signIn();
-  //   return <></>;
-  // }
 
   if (router.query.userId !== data?.user?.id) {
     void router.push(`/dashboard/${data?.user?.id || ""}`);

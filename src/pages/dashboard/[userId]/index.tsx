@@ -111,17 +111,29 @@ function useLocalIdRemap() {
   };
 }
 
-const DartBoardLayout = ({
-  isLoading,
-  dartBoardName,
-  children,
-  extras,
+const DartBoardLayout = <
+  T extends Record<
+    string,
+    {
+      content: React.ReactNode;
+      extras?: React.ReactNode;
+    }
+  >
+>({
+  dartBoardId,
+  defaultSelectedTab,
+  tabs,
 }: {
-  isLoading?: boolean;
-  dartBoardName?: string;
-  children: React.ReactNode;
-  extras?: React.ReactNode;
+  dartBoardId: string;
+  defaultSelectedTab: keyof T;
+  tabs: T;
 }) => {
+  const [selectedTab, setSelectedTab] = useState(defaultSelectedTab);
+  const { data: dartBoard, isLoading: dartBoardIsLoading } =
+    api.dart.getDartBoard.useQuery({
+      dartBoardId,
+    });
+
   return (
     <Stack direction="column" gap={2}>
       <Typography
@@ -133,10 +145,10 @@ const DartBoardLayout = ({
         variant="h4"
         component="h1"
       >
-        {isLoading ? <Skeleton /> : dartBoardName}
+        {dartBoardIsLoading ? <Skeleton /> : dartBoard?.name}
       </Typography>
       <Stack direction="row" gap={1}>
-        {isLoading ? (
+        {dartBoardIsLoading ? (
           <Skeleton
             sx={{
               width: "100%",
@@ -154,184 +166,192 @@ const DartBoardLayout = ({
             }}
             direction="row"
           >
-            <Tabs value={0} aria-label="dashboard tabs">
-              <Tab
-                sx={({ spacing }) => ({
-                  paddingY: spacing(3),
-                })}
-                label="All"
-              />
-              <Tab
-                sx={({ spacing }) => ({
-                  paddingY: spacing(3),
-                })}
-                label="Group"
-              />
+            <Tabs
+              value={selectedTab}
+              onChange={(e, value) => {
+                if (typeof value === "string") setSelectedTab(value);
+              }}
+              aria-label="dashboard tabs"
+            >
+              {Object.keys(tabs).map((tab) => {
+                return (
+                  <Tab
+                    sx={({ spacing }) => ({
+                      paddingY: spacing(3),
+                    })}
+                    key={tab}
+                    value={tab}
+                    label={tab}
+                  />
+                );
+              })}
             </Tabs>
-            <Box>{extras}</Box>
-            {/* <Stack direction="row" gap={1}>
-              <Box
-                sx={() => ({
-                  backgroundColor: "grey.800",
-                  borderRadius: 2,
-                })}
-              >
-                <InputBase
-                  sx={({ spacing }) => ({
-                    color: "grey.300",
-                    padding: spacing(1, 2),
-                  })}
-                  placeholder="Search"
-                  name="Search"
-                  fullWidth
-                />
-              </Box>
-              <Button variant="contained">
-                <Typography variant="button">New Dart</Typography>
-              </Button>
-            </Stack> */}
+            <Box>{selectedTab && tabs[selectedTab]?.extras}</Box>
           </Stack>
         )}
       </Stack>
-      <Box>{children}</Box>
+      <Box>{selectedTab && tabs[selectedTab]?.content}</Box>
     </Stack>
   );
 };
 
-const AllDartsDartBoardContent = ({
-  dartBoardId,
-}: {
-  dartBoardId: string;
-}) => {};
+const AllDartsExtras = () => {
+  return (
+    <Stack direction="row" gap={1}>
+      <Stack direction="row" gap={1}>
+        <Box
+          sx={() => ({
+            backgroundColor: "grey.800",
+            borderRadius: 2,
+          })}
+        >
+          <InputBase
+            sx={({ spacing }) => ({
+              color: "grey.300",
+              padding: spacing(1, 2),
+            })}
+            placeholder="Search"
+            name="Search"
+            fullWidth
+          />
+        </Box>
+        <Button variant="contained">
+          <Typography variant="button">New Dart</Typography>
+        </Button>
+      </Stack>
+    </Stack>
+  );
+};
 
-const DartBoard = ({ dartBoardId }: { dartBoardId: string }) => {
-  const utils = api.useContext();
+const AllDartsContent = ({ dartBoardId }: { dartBoardId: string }) => {
   const [edittedDartId, setEdittedDartId] = useState<string | null>(null);
-  const { data: dartBoard, isLoading: dartBoardIsLoading } =
-    api.dart.getDartBoard.useQuery({
-      dartBoardId,
-    });
   const { data: darts, isLoading: dartsIsLoading } =
     api.dart.getAllDartsForBoard.useQuery({
       dartBoardId,
     });
   const { mutateAsync: createDart } = api.dart.createDart.useMutation({
-    onSuccess: async () => {
-      await utils.dart.getAllDartsForBoard.invalidate({
-        dartBoardId,
-      });
-    },
+    // onSuccess: async () => {
+    //   await utils.dart.getAllDartsForBoard.invalidate({
+    //     dartBoardId,
+    //   });
+    // },
   });
-
   return (
-    <Stack direction="column" gap={2}>
-      <Typography
-        sx={({ spacing }) => ({
-          width: "50%",
-          paddingTop: spacing(4),
-          fontWeight: "bold",
-        })}
-        variant="h4"
-        component="h1"
-      >
-        {dartBoardIsLoading ? <Skeleton /> : dartBoard?.name}
-      </Typography>
-      <form
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        onSubmit={async (e) => {
-          e.preventDefault();
-          await createDart({
-            dartBoardId,
-            text: "",
-          });
-        }}
-      >
-        <Stack direction="row" gap={1}>
-          {dartBoardIsLoading ? (
-            <Skeleton
-              sx={{
-                width: "100%",
-                height: 64,
+    <Grid spacing={2} container>
+      {dartsIsLoading ? (
+        <>
+          <Grid item xs={12}>
+            <Skeleton height={64} />
+          </Grid>
+        </>
+      ) : (
+        darts?.map((dart) => (
+          <Grid key={dart.id} item xs={12} sm={6} lg={4}>
+            <Dart
+              content={dart.text}
+              onRequestEdit={() => {
+                setEdittedDartId(dart.id);
               }}
+              onRequestClose={() => {
+                setEdittedDartId(null);
+              }}
+              editMode={edittedDartId === dart.id}
+              autoFocusOnEdit
             />
-          ) : (
-            <Stack
-              sx={{
-                width: "100%",
-                borderBottom: "1px solid",
-                borderColor: "grey.700",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-              direction="row"
-            >
-              <Tabs value={0} aria-label="dashboard tabs">
-                <Tab
-                  sx={({ spacing }) => ({
-                    paddingY: spacing(3),
-                  })}
-                  label="All"
-                />
-                <Tab
-                  sx={({ spacing }) => ({
-                    paddingY: spacing(3),
-                  })}
-                  label="Group"
-                />
-              </Tabs>
-              <Stack direction="row" gap={1}>
-                <Box
-                  sx={() => ({
-                    backgroundColor: "grey.800",
-                    borderRadius: 2,
-                  })}
-                >
-                  <InputBase
-                    sx={({ spacing }) => ({
-                      color: "grey.300",
-                      padding: spacing(1, 2),
-                    })}
-                    placeholder="Search"
-                    name="Search"
-                    fullWidth
-                  />
-                </Box>
-                <Button variant="contained">
-                  <Typography variant="button">New Dart</Typography>
-                </Button>
-              </Stack>
-            </Stack>
-          )}
-        </Stack>
-      </form>
-      <Grid spacing={2} container>
-        {dartsIsLoading ? (
-          <>
-            <Grid item xs={12}>
-              <Skeleton height={64} />
-            </Grid>
-          </>
-        ) : (
-          darts?.map((dart) => (
-            <Grid key={dart.id} item xs={12} sm={6} lg={4}>
-              <Dart
-                content={dart.text}
-                onRequestEdit={() => {
-                  setEdittedDartId(dart.id);
-                }}
-                onRequestClose={() => {
-                  setEdittedDartId(null);
-                }}
-                editMode={edittedDartId === dart.id}
-                autoFocusOnEdit
-              />
-            </Grid>
-          ))
-        )}
-      </Grid>
-    </Stack>
+          </Grid>
+        ))
+      )}
+    </Grid>
   );
 };
+
+// const AllDartsDartBoardContent = ({ dartBoardId }: { dartBoardId: string }) => {
+//   const utils = api.useContext();
+//   const [edittedDartId, setEdittedDartId] = useState<string | null>(null);
+//   const { data: dartBoard, isLoading: dartBoardIsLoading } =
+//     api.dart.getDartBoard.useQuery({
+//       dartBoardId,
+//     });
+//   const { data: darts, isLoading: dartsIsLoading } =
+//     api.dart.getAllDartsForBoard.useQuery({
+//       dartBoardId,
+//     });
+//   const { mutateAsync: createDart } = api.dart.createDart.useMutation({
+//     // onSuccess: async () => {
+//     //   await utils.dart.getAllDartsForBoard.invalidate({
+//     //     dartBoardId,
+//     //   });
+//     // },
+//   });
+
+//   return (
+//     <DartBoardLayout
+//       defaultSelectedTab="all"
+//       dartBoardName={dartBoard?.name}
+//       isLoading={dartBoardIsLoading}
+//       extras={
+//         <Stack direction="row" gap={1}>
+//           {dartBoardIsLoading ? (
+//             <Skeleton
+//               sx={{
+//                 width: "100%",
+//                 height: 64,
+//               }}
+//             />
+//           ) : (
+//             <Stack direction="row" gap={1}>
+//               <Box
+//                 sx={() => ({
+//                   backgroundColor: "grey.800",
+//                   borderRadius: 2,
+//                 })}
+//               >
+//                 <InputBase
+//                   sx={({ spacing }) => ({
+//                     color: "grey.300",
+//                     padding: spacing(1, 2),
+//                   })}
+//                   placeholder="Search"
+//                   name="Search"
+//                   fullWidth
+//                 />
+//               </Box>
+//               <Button variant="contained">
+//                 <Typography variant="button">New Dart</Typography>
+//               </Button>
+//             </Stack>
+//           )}
+//         </Stack>
+//       }
+//     >
+//       <Grid spacing={2} container>
+//         {dartsIsLoading ? (
+//           <>
+//             <Grid item xs={12}>
+//               <Skeleton height={64} />
+//             </Grid>
+//           </>
+//         ) : (
+//           darts?.map((dart) => (
+//             <Grid key={dart.id} item xs={12} sm={6} lg={4}>
+//               <Dart
+//                 content={dart.text}
+//                 onRequestEdit={() => {
+//                   setEdittedDartId(dart.id);
+//                 }}
+//                 onRequestClose={() => {
+//                   setEdittedDartId(null);
+//                 }}
+//                 editMode={edittedDartId === dart.id}
+//                 autoFocusOnEdit
+//               />
+//             </Grid>
+//           ))
+//         )}
+//       </Grid>
+//     </DartBoardLayout>
+//   );
+// };
 
 const Dashboard = () => {
   const theme = useTheme();
@@ -409,7 +429,20 @@ const Dashboard = () => {
           }}
           direction="column"
         >
-          <DartBoard dartBoardId={selectedDartBoardId || ""} />
+          {selectedDartBoardId && (
+            <DartBoardLayout
+              defaultSelectedTab="all"
+              dartBoardId={selectedDartBoardId}
+              tabs={{
+                all: {
+                  content: (
+                    <AllDartsContent dartBoardId={selectedDartBoardId} />
+                  ),
+                  extras: <AllDartsExtras />,
+                },
+              }}
+            />
+          )}
         </Stack>
       </Stack>
     </Container>

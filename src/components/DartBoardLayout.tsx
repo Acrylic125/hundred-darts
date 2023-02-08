@@ -85,3 +85,5 @@ const DartBoardLayout = <
     </Stack>
   );
 };
+
+export default DartBoardLayout;

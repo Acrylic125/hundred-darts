@@ -12,31 +12,6 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
-function useLocalIdRemap() {
-  const [localIdRemap, setLocalIdRemap] = useState<Map<string, string>>(
-    new Map()
-  );
-  const [localIdCounter, setLocalIdCounter] = useState(0);
-
-  return {
-    newLocalId: () => {
-      const newId = `local-${localIdCounter}`;
-      setLocalIdCounter((prev) => prev + 1);
-      return newId;
-    },
-    bindLocalId: (localId: string, remoteId: string) => {
-      setLocalIdRemap((prev) => {
-        const newMap = new Map(prev);
-        newMap.set(localId, remoteId);
-        return newMap;
-      });
-    },
-    getMappedId: (localId: string) => {
-      return localIdRemap.get(localId);
-    },
-  };
-}
-
 const Dashboard = () => {
   const theme = useTheme();
   const isGreaterThanMd = useMediaQuery(theme.breakpoints.up("md"));

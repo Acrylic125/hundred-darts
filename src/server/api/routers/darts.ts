@@ -9,6 +9,7 @@ export const dartRouter = createTRPCRouter({
       z.object({
         dartBoardId: z.string(),
         text: z.string(),
+        createdAt: z.date().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -38,6 +39,7 @@ export const dartRouter = createTRPCRouter({
         data: {
           text: input.text,
           dartBoardId: input.dartBoardId,
+          createdAt: input.createdAt || new Date(),
         },
       });
       return dart;
@@ -107,6 +109,107 @@ export const dartRouter = createTRPCRouter({
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
       return dartBoardWithDarts;
+    }),
+  updateDart: protectedProcedure
+    .input(
+      z.object({
+        dartId: z.string(),
+        text: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const dart = await ctx.prisma.dart.findUnique({
+        where: {
+          id: input.dartId,
+        },
+        select: {
+          dartBoardId: true,
+        },
+      });
+      if (!dart) {
+        return null;
+      }
+
+      const dartBoard = await ctx.prisma.dartBoard.findUnique({
+        where: {
+          id: dart.dartBoardId,
+        },
+        select: {
+          userId: true,
+        },
+      });
+      if (!dartBoard) {
+        return null;
+      }
+
+      if (
+        !(
+          ctx.session &&
+          ctx.session.user &&
+          ctx.session.user.id === dartBoard.userId
+        )
+      ) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+
+      const updatedDart = await ctx.prisma.dart.update({
+        where: {
+          id: input.dartId,
+        },
+        data: {
+          text: input.text,
+          updatedAt: new Date(),
+        },
+      });
+      return updatedDart;
+    }),
+  deleteDart: protectedProcedure
+    .input(
+      z.object({
+        dartId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const dart = await ctx.prisma.dart.findUnique({
+        where: {
+          id: input.dartId,
+        },
+        select: {
+          dartBoardId: true,
+        },
+      });
+      if (!dart) {
+        return null;
+      }
+
+      const dartBoard = await ctx.prisma.dartBoard.findUnique({
+        where: {
+          id: dart.dartBoardId,
+        },
+        select: {
+          userId: true,
+        },
+      });
+      if (!dartBoard) {
+        return null;
+      }
+
+      if (
+        !(
+          ctx.session &&
+          ctx.session.user &&
+          ctx.session.user.id === dartBoard.userId
+        )
+      ) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+
+      const deletedDart = await ctx.prisma.dart.delete({
+        where: {
+          id: input.dartId,
+        },
+      });
+      return deletedDart;
     }),
   createDartBoard: protectedProcedure
     .input(

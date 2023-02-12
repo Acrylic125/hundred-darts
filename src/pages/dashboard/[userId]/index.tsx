@@ -91,7 +91,10 @@ const Dashboard = () => {
               tabs={{
                 all: {
                   content: (
-                    <AllDartsContent dartBoardId={selectedDartBoardId} />
+                    <AllDartsContent
+                      key={selectedDartBoardId}
+                      dartBoardId={selectedDartBoardId}
+                    />
                   ),
                   extras: <AllDartsExtras />,
                 },

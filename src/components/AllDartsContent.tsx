@@ -115,7 +115,38 @@ const AllDartsContent = ({ dartBoardId }: { dartBoardId: string }) => {
     },
   });
   const { mutateAsync: updateDart } = api.dart.updateDart.useMutation();
-  const { mutateAsync: deleteDart } = api.dart.deleteDart.useMutation();
+  const { mutateAsync: deleteDart } = api.dart.deleteDart.useMutation({
+    onMutate: ({ dartId: $dartId }) => {
+      const maybeLocalId = localIds.getLocalId($dartId);
+      const dartId = maybeLocalId ?? $dartId;
+
+      const dart = darts?.find((dart) => dart.id === dartId);
+      setDarts((prev) => {
+        if (prev === null) {
+          return null;
+        }
+        return prev.filter((d) => d.id !== dartId);
+      });
+
+      return {
+        dart,
+      };
+    },
+    onError: (error, variables, context) => {
+      if (!context) {
+        return;
+      }
+      setDarts((prev) => {
+        if (prev === null) {
+          return null;
+        }
+        if (context.dart === undefined) {
+          return prev;
+        }
+        return [...prev, context.dart];
+      });
+    },
+  });
 
   return (
     <Grid spacing={2} container>
@@ -138,33 +169,16 @@ const AllDartsContent = ({ dartBoardId }: { dartBoardId: string }) => {
                   setEdittedDartId(dart.id);
                 }}
                 onRequestDelete={() => {
-                  setDarts((prev) => {
-                    if (prev === null) {
-                      return null;
-                    }
-                    return prev.filter((d) => d.id !== dart.id);
-                  });
-
                   const runDeleteDart = (id: string) => {
-                    void deleteDart(
-                      {
-                        dartId: id,
-                      },
-                      {
-                        onError: () => {
-                          setDarts((prev) => {
-                            if (prev === null) {
-                              return null;
-                            }
-                            return [...prev, dart];
-                          });
-                        },
-                      }
-                    );
+                    void deleteDart({
+                      dartId: id,
+                    });
                   };
 
                   if (localIds.isLocalId(dart.id)) {
-                    localIds.runForBounded(dart.id, runDeleteDart);
+                    localIds.runForBounded(dart.id, (boundedId) => {
+                      runDeleteDart(boundedId);
+                    });
                     return;
                   }
                   runDeleteDart(dart.id);

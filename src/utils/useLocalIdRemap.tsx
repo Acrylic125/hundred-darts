@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 
 export type LocalId = string;
 
@@ -10,6 +10,11 @@ export default function useLocalIdRemap() {
   const counter = useRef(0);
 
   return {
+    clear: () => {
+      localIdRemapRef.current.clear();
+      unboundedLocalIdSubscriptions.current.clear();
+      counter.current = 0;
+    },
     newLocalId: (): LocalId => {
       const newLocalId = `local-${counter.current}`;
       counter.current += 1;
@@ -17,14 +22,14 @@ export default function useLocalIdRemap() {
       unboundedLocalIdSubscriptions.current.set(newLocalId, []);
       return newLocalId;
     },
-    bindLocalId: (localId: LocalId, remoteId: string) => {
+    bindLocalId: (localId: LocalId, boundedId: string) => {
       if (localIdRemapRef.current.get(localId) !== null) {
         throw new Error("Local ID already bound");
       }
-      localIdRemapRef.current.set(localId, remoteId);
+      localIdRemapRef.current.set(localId, boundedId);
       unboundedLocalIdSubscriptions.current
         .get(localId)
-        ?.forEach((callback) => callback(remoteId));
+        ?.forEach((callback) => callback(boundedId));
       unboundedLocalIdSubscriptions.current.delete(localId);
     },
     isLocalId: (id: string) => {
@@ -35,6 +40,14 @@ export default function useLocalIdRemap() {
     },
     getMappedId: (localId: LocalId) => {
       return localIdRemapRef.current.get(localId);
+    },
+    getLocalId: (boundedId: string) => {
+      for (const [localId, maybeRemoteId] of localIdRemapRef.current) {
+        if (maybeRemoteId === boundedId) {
+          return localId;
+        }
+      }
+      return null;
     },
     runForBounded: (
       localId: LocalId,

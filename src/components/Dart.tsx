@@ -30,39 +30,17 @@ const Dart = ({
 
   return (
     <>
-      <ContextMenu
-        onRequestClose={() => {
-          setContextMenu(null);
-        }}
-        openState={contextMenu}
-        sections={[
-          {
-            items: [
-              {
-                label: "Duplicate",
-                shortcut: "Ctrl+D",
-                onClick: () => {
-                  onRequestDuplicate?.();
-                },
-              },
-              {
-                label: "Delete",
-                shortcut: "Delete",
-                onClick: () => {
-                  onRequestDelete?.();
-                },
-              },
-            ],
-          },
-        ]}
-      />
       <Box
         onContextMenu={(e) => {
           e.preventDefault();
-          setContextMenu({
-            top: e.clientY,
-            left: e.clientX,
-          });
+          setContextMenu(
+            contextMenu
+              ? null
+              : {
+                  top: e.clientY,
+                  left: e.clientX,
+                }
+          );
         }}
         onClick={() => {
           onRequestEdit?.();
@@ -77,6 +55,33 @@ const Dart = ({
           borderColor: "primary.500",
         }}
       >
+        <ContextMenu
+          onRequestClose={() => {
+            setContextMenu(null);
+          }}
+          openState={contextMenu}
+          sections={[
+            {
+              items: [
+                {
+                  label: "Duplicate",
+                  shortcut: "Ctrl+D",
+                  onClick: () => {
+                    setContextMenu(null);
+                    onRequestDuplicate?.();
+                  },
+                },
+                {
+                  label: "Delete",
+                  shortcut: "Delete",
+                  onClick: () => {
+                    onRequestDelete?.();
+                  },
+                },
+              ],
+            },
+          ]}
+        />
         {editMode ? (
           <InputBase
             autoFocus={autoFocusOnEdit}

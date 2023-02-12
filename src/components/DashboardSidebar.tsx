@@ -194,6 +194,7 @@ const DashboardSidebar = ({
           </Box>
           <Stack
             sx={{
+              flexGrow: 1,
               justifyContent: "center",
             }}
             direction="column"
@@ -203,7 +204,7 @@ const DashboardSidebar = ({
                 fontWeight: "bold",
               }}
               color="grey.100"
-              variant="body1"
+              variant="body2"
               component="h3"
             >
               {user.name ?? "User"}
@@ -213,7 +214,7 @@ const DashboardSidebar = ({
                 wordBreak: "break-all",
               }}
               color="grey.500"
-              variant="body1"
+              variant="caption"
               component="p"
             >
               {user.email ?? "No Email"}

@@ -1,6 +1,7 @@
 import { EventSubscriber } from "@/events";
 import useEventSubscriber from "@/events/useEventSubscriber";
 import { api } from "@/utils/api";
+import useLocalIdRemap from "@/utils/useLocalIdRemap";
 import {
   Box,
   Button,
@@ -11,81 +12,12 @@ import {
   Typography,
 } from "@mui/material";
 import type { Dart as DartType } from "@prisma/client";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import Dart from "./Dart";
 
 const createDartSubscriber = new EventSubscriber<{
   content?: string;
 }>();
-
-type LocalId = string;
-
-function useLocalIdRemap() {
-  // const [localIdRemap, setLocalIdRemap] = useState<Map<LocalId, string | null>>(
-  //   new Map()
-  // );
-  const localIdRemapRef = useRef(new Map<LocalId, string | null>());
-  const unboundedLocalIdSubscriptions = useRef(
-    new Map<LocalId, ((boundedId: string) => void)[]>()
-  );
-  const counter = useRef(0);
-
-  return {
-    newLocalId: (): LocalId => {
-      const newLocalId = `local-${counter.current}`;
-      counter.current += 1;
-      localIdRemapRef.current.set(newLocalId, null);
-      unboundedLocalIdSubscriptions.current.set(newLocalId, []);
-      // setLocalIdRemap((prev) => {
-      //   const newMap = new Map(prev);
-      //   newMap.set(newId, null);
-      //   return newMap;
-      // });
-      return newLocalId;
-    },
-    bindLocalId: (localId: LocalId, remoteId: string) => {
-      if (localIdRemapRef.current.get(localId) !== null) {
-        throw new Error("Local ID already bound");
-      }
-      localIdRemapRef.current.set(localId, remoteId);
-      unboundedLocalIdSubscriptions.current
-        .get(localId)
-        ?.forEach((callback) => callback(remoteId));
-      unboundedLocalIdSubscriptions.current.delete(localId);
-      // setLocalIdRemap((prev) => {
-      //   const newMap = new Map(prev);
-      //   newMap.set(localId, remoteId);
-      //   return newMap;
-      // });
-    },
-    isLocalId: (id: string) => {
-      return id.startsWith("local-") && localIdRemapRef.current.has(id);
-    },
-    isLocalIdBounded: (id: string) => {
-      return localIdRemapRef.current.get(id) !== null;
-    },
-    getMappedId: (localId: LocalId) => {
-      return localIdRemapRef.current.get(localId);
-    },
-    runForBounded: (
-      localId: LocalId,
-      callback: (boundedId: string) => void
-    ) => {
-      const maybeBoundedId = localIdRemapRef.current.get(localId);
-      console.log("maybeBoundedId", localId, maybeBoundedId);
-      if (maybeBoundedId !== null && maybeBoundedId !== undefined) {
-        callback(maybeBoundedId);
-        return;
-      }
-      const callbacks = unboundedLocalIdSubscriptions.current.get(localId);
-      if (callbacks === undefined) {
-        unboundedLocalIdSubscriptions.current.set(localId, [callback]);
-        return;
-      }
-      callbacks.push(callback);
-    },
-  };
-}
 
 const AllDartsExtras = () => {
   return (

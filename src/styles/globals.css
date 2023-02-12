@@ -6,3 +6,24 @@ body {
   margin: 0;
   padding: 0;
 }
+
+/* width */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #282c2f;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #3c4348;
+  border-radius: 1em;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #4d5860;
+}

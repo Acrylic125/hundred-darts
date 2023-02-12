@@ -10,11 +10,14 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import type { Session } from "next-auth";
+import Image from "next/image";
 import { useState } from "react";
 import CreateDartBoardModal from "./CreateDartBoardModal";
 
 const DashboardSidebar = ({
   sx,
+  user,
   selectedDartBoardId,
   onSelectDartBoard,
   collapsable,
@@ -22,6 +25,7 @@ const DashboardSidebar = ({
   userId,
 }: {
   sx?: SxProps<Theme>;
+  user: Session["user"];
   selectedDartBoardId?: string | null;
   onSelectDartBoard?: (dartBoardId: string | null) => void;
   collapsable?: boolean;
@@ -170,11 +174,51 @@ const DashboardSidebar = ({
             paddingY: 2,
             bottom: 0,
             zIndex: 1,
+            alignItems: "center",
           }}
+          gap={2}
+          direction="row"
         >
-          <Typography variant="body1" component="h2">
-            {dartBoards?.length} Dart Boards
-          </Typography>
+          <Box
+            sx={{
+              width: 42,
+              height: 42,
+              position: "relative",
+            }}
+          >
+            <Image
+              src={user.image ?? "/default_pfp.png"}
+              alt={(user.name ?? "User") + " Profile Picture"}
+              fill
+            />
+          </Box>
+          <Stack
+            sx={{
+              justifyContent: "center",
+            }}
+            direction="column"
+          >
+            <Typography
+              sx={{
+                fontWeight: "bold",
+              }}
+              color="grey.100"
+              variant="body1"
+              component="h3"
+            >
+              {user.name ?? "User"}
+            </Typography>
+            <Typography
+              sx={{
+                wordBreak: "break-all",
+              }}
+              color="grey.500"
+              variant="body1"
+              component="p"
+            >
+              {user.email ?? "No Email"}
+            </Typography>
+          </Stack>
         </Stack>
       </Stack>
     </Box>

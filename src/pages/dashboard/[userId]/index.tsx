@@ -38,6 +38,7 @@ const Dashboard = () => {
       <Stack direction="row" gap={4}>
         {isGreaterThanMd ? (
           <DashboardSidebar
+            user={data?.user}
             selectedDartBoardId={selectedDartBoardId}
             onSelectDartBoard={setSelectedDartBoardId}
             sx={({ breakpoints }) => ({
@@ -63,6 +64,7 @@ const Dashboard = () => {
             }}
           >
             <DashboardSidebar
+              user={data?.user}
               collapsable
               onCollapse={() => {
                 setSmallVPSidebarCollapsed(true);

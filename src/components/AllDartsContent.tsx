@@ -21,31 +21,68 @@ const createDartSubscriber = new EventSubscriber<{
 type LocalId = string;
 
 function useLocalIdRemap() {
-  const [localIdRemap, setLocalIdRemap] = useState<Map<LocalId, string | null>>(
-    new Map()
+  // const [localIdRemap, setLocalIdRemap] = useState<Map<LocalId, string | null>>(
+  //   new Map()
+  // );
+  const localIdRemapRef = useRef(new Map<LocalId, string | null>());
+  const unboundedLocalIdSubscriptions = useRef(
+    new Map<LocalId, ((boundedId: string) => void)[]>()
   );
   const counter = useRef(0);
 
   return {
     newLocalId: (): LocalId => {
-      const newId = `local-${counter.current}`;
+      const newLocalId = `local-${counter.current}`;
       counter.current += 1;
-      setLocalIdRemap((prev) => {
-        const newMap = new Map(prev);
-        newMap.set(newId, null);
-        return newMap;
-      });
-      return newId;
+      localIdRemapRef.current.set(newLocalId, null);
+      unboundedLocalIdSubscriptions.current.set(newLocalId, []);
+      // setLocalIdRemap((prev) => {
+      //   const newMap = new Map(prev);
+      //   newMap.set(newId, null);
+      //   return newMap;
+      // });
+      return newLocalId;
     },
     bindLocalId: (localId: LocalId, remoteId: string) => {
-      setLocalIdRemap((prev) => {
-        const newMap = new Map(prev);
-        newMap.set(localId, remoteId);
-        return newMap;
-      });
+      if (localIdRemapRef.current.get(localId) !== null) {
+        throw new Error("Local ID already bound");
+      }
+      localIdRemapRef.current.set(localId, remoteId);
+      unboundedLocalIdSubscriptions.current
+        .get(localId)
+        ?.forEach((callback) => callback(remoteId));
+      unboundedLocalIdSubscriptions.current.delete(localId);
+      // setLocalIdRemap((prev) => {
+      //   const newMap = new Map(prev);
+      //   newMap.set(localId, remoteId);
+      //   return newMap;
+      // });
+    },
+    isLocalId: (id: string) => {
+      return id.startsWith("local-") && localIdRemapRef.current.has(id);
+    },
+    isLocalIdBounded: (id: string) => {
+      return localIdRemapRef.current.get(id) !== null;
     },
     getMappedId: (localId: LocalId) => {
-      return localIdRemap.get(localId);
+      return localIdRemapRef.current.get(localId);
+    },
+    runForBounded: (
+      localId: LocalId,
+      callback: (boundedId: string) => void
+    ) => {
+      const maybeBoundedId = localIdRemapRef.current.get(localId);
+      console.log("maybeBoundedId", localId, maybeBoundedId);
+      if (maybeBoundedId !== null && maybeBoundedId !== undefined) {
+        callback(maybeBoundedId);
+        return;
+      }
+      const callbacks = unboundedLocalIdSubscriptions.current.get(localId);
+      if (callbacks === undefined) {
+        unboundedLocalIdSubscriptions.current.set(localId, [callback]);
+        return;
+      }
+      callbacks.push(callback);
     },
   };
 }
@@ -86,39 +123,13 @@ const AllDartsExtras = () => {
 const AllDartsContent = ({ dartBoardId }: { dartBoardId: string }) => {
   const [edittedDartId, setEdittedDartId] = useState<string | null>(null);
   const [darts, setDarts] = useState<DartType[] | null>(null);
-  const { newLocalId, bindLocalId, getMappedId } = useLocalIdRemap();
-  useEventSubscriber(createDartSubscriber, ({ content }) => {
-    const localId = newLocalId();
-    setEdittedDartId(localId);
-    setDarts((prev) => {
-      if (prev === null) {
-        return null;
-      }
-      return [
-        ...prev,
-        {
-          id: localId,
-          text: content ?? "",
-          dartBoardId,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          deletedAt: null,
-        },
-      ];
+  const localIds = useLocalIdRemap();
+  useEventSubscriber(createDartSubscriber, async ({ content }) => {
+    await createDart({
+      dartBoardId,
+      text: content ?? "",
     });
-    void createDart(
-      {
-        dartBoardId,
-        text: content ?? "",
-      },
-      {
-        onSuccess: (data) => {
-          if (data !== null) {
-            bindLocalId(localId, data.id);
-          }
-        },
-      }
-    );
+    // console.log("result", result);
   });
   const { isLoading: dartsIsLoading } = api.dart.getAllDartsForBoard.useQuery(
     {
@@ -130,7 +141,48 @@ const AllDartsContent = ({ dartBoardId }: { dartBoardId: string }) => {
       },
     }
   );
-  const { mutateAsync: createDart } = api.dart.createDart.useMutation();
+  const { mutateAsync: createDart } = api.dart.createDart.useMutation({
+    onMutate: ({ text, dartBoardId }) => {
+      const localId = localIds.newLocalId();
+      setEdittedDartId(localId);
+      setDarts((prev) => {
+        if (prev === null) {
+          return null;
+        }
+        return [
+          ...prev,
+          {
+            id: localId,
+            text,
+            dartBoardId,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            deletedAt: null,
+          },
+        ];
+      });
+
+      return {
+        localId,
+      };
+    },
+    onSuccess: (data, variables, context) => {
+      if (data !== null && context) {
+        localIds.bindLocalId(context.localId, data.id);
+      }
+    },
+    onError: (error, variables, context) => {
+      if (!context) {
+        return;
+      }
+      setDarts((prev) => {
+        if (prev === null) {
+          return null;
+        }
+        return prev.filter((d) => d.id !== context.localId);
+      });
+    },
+  });
   const { mutateAsync: updateDart } = api.dart.updateDart.useMutation();
   const { mutateAsync: deleteDart } = api.dart.deleteDart.useMutation();
 
@@ -161,71 +213,54 @@ const AllDartsContent = ({ dartBoardId }: { dartBoardId: string }) => {
                     }
                     return prev.filter((d) => d.id !== dart.id);
                   });
-                  void deleteDart(
-                    {
-                      dartId: getMappedId(dart.id) ?? dart.id,
-                    },
-                    {
-                      onError: () => {
-                        setDarts((prev) => {
-                          if (prev === null) {
-                            return null;
-                          }
-                          return [...prev, dart];
-                        });
+
+                  const runDeleteDart = (id: string) => {
+                    void deleteDart(
+                      {
+                        dartId: id,
                       },
-                    }
-                  );
+                      {
+                        onError: (err) => {
+                          console.error(err);
+                          setDarts((prev) => {
+                            if (prev === null) {
+                              return null;
+                            }
+                            return [...prev, dart];
+                          });
+                        },
+                      }
+                    );
+                  };
+
+                  if (localIds.isLocalId(dart.id)) {
+                    localIds.runForBounded(dart.id, runDeleteDart);
+                    return;
+                  }
+                  runDeleteDart(dart.id);
                 }}
                 onRequestDuplicate={() => {
-                  const localId = newLocalId();
-                  setEdittedDartId(null);
-                  setDarts((prev) => {
-                    if (prev === null) {
-                      return null;
-                    }
-                    return [
-                      ...prev,
-                      {
-                        id: localId,
-                        text: dart.text + " duplicated",
-                        dartBoardId,
-                        createdAt: new Date(),
-                        updatedAt: new Date(),
-                        deletedAt: null,
-                      },
-                    ];
+                  void createDart({
+                    dartBoardId,
+                    text: dart.text,
                   });
-                  void createDart(
-                    {
-                      dartBoardId,
-                      text: dart.text,
-                    },
-                    {
-                      onSuccess: (data) => {
-                        if (data !== null) {
-                          bindLocalId(localId, data.id);
-                        }
-                      },
-                      onError: () => {
-                        setDarts((prev) => {
-                          if (prev === null) {
-                            return null;
-                          }
-                          return prev.filter((d) => d.id !== localId);
-                        });
-                      },
-                    }
-                  );
                 }}
                 onRequestClose={() => {
                   setEdittedDartId(null);
                 }}
                 onRequestSave={(content) => {
-                  void updateDart({
-                    dartId: getMappedId(dart.id) ?? dart.id,
-                    text: content,
-                  });
+                  const runUpdateDart = (id: string) => {
+                    void updateDart({
+                      dartId: id,
+                      text: content,
+                    });
+                  };
+
+                  if (localIds.isLocalId(dart.id)) {
+                    localIds.runForBounded(dart.id, runUpdateDart);
+                    return;
+                  }
+                  runUpdateDart(dart.id);
                 }}
                 editMode={edittedDartId === dart.id}
                 autoFocusOnEdit

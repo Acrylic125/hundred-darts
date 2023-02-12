@@ -16,7 +16,7 @@ const Dart = ({
   onRequestEdit?: () => void;
   onRequestDelete?: () => void;
   onRequestSave?: (content: string) => void;
-  onRequestDuplicate?: () => void;
+  onRequestDuplicate?: (content: string) => void;
   onRequestClose?: () => void;
   editMode?: boolean;
   autoFocusOnEdit?: boolean;
@@ -68,7 +68,7 @@ const Dart = ({
                   shortcut: "Ctrl+D",
                   onClick: () => {
                     setContextMenu(null);
-                    onRequestDuplicate?.();
+                    onRequestDuplicate?.(content);
                   },
                 },
                 {

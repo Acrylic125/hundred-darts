@@ -61,7 +61,6 @@ const AllDartsContent = ({ dartBoardId }: { dartBoardId: string }) => {
       dartBoardId,
       text: content ?? "",
     });
-    // console.log("result", result);
   });
   const { isLoading: dartsIsLoading } = api.dart.getAllDartsForBoard.useQuery(
     {
@@ -152,8 +151,7 @@ const AllDartsContent = ({ dartBoardId }: { dartBoardId: string }) => {
                         dartId: id,
                       },
                       {
-                        onError: (err) => {
-                          console.error(err);
+                        onError: () => {
                           setDarts((prev) => {
                             if (prev === null) {
                               return null;
@@ -171,10 +169,10 @@ const AllDartsContent = ({ dartBoardId }: { dartBoardId: string }) => {
                   }
                   runDeleteDart(dart.id);
                 }}
-                onRequestDuplicate={() => {
+                onRequestDuplicate={(text) => {
                   void createDart({
                     dartBoardId,
-                    text: dart.text,
+                    text,
                   });
                 }}
                 onRequestClose={() => {

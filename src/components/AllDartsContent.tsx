@@ -216,8 +216,9 @@ const AllDartsContent = ({ dartBoardId }: { dartBoardId: string }) => {
         <Stack
           sx={({ spacing }) => ({
             width: "100%",
-            height: "100%",
+            flexGrow: 1,
             alignItems: "center",
+            justifyContent: "center",
             padding: spacing(8),
           })}
           gap={5}

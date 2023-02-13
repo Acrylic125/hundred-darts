@@ -26,62 +26,87 @@ const DartBoardLayout = <
     });
 
   return (
-    <Stack direction="column" gap={2}>
-      <Typography
-        sx={({ spacing }) => ({
-          width: "50%",
-          paddingTop: spacing(4),
-          fontWeight: "bold",
-        })}
-        variant="h4"
-        component="h1"
+    <Stack
+      sx={{
+        height: "100vh",
+        position: "relative",
+        overflow: "auto",
+      }}
+      direction="column"
+      gap={2}
+    >
+      <Stack
+        sx={{
+          position: "sticky",
+          top: 0,
+          backgroundColor: "grey.900",
+          zIndex: 1,
+        }}
+        direction="column"
+        gap={2}
       >
-        {dartBoardIsLoading ? <Skeleton /> : dartBoard?.name}
-      </Typography>
-      <Stack direction="row" gap={1}>
-        {dartBoardIsLoading ? (
-          <Skeleton
-            sx={{
-              width: "100%",
-              height: 64,
-            }}
-          />
-        ) : (
-          <Stack
-            sx={{
-              width: "100%",
-              borderBottom: "1px solid",
-              borderColor: "grey.700",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-            direction="row"
-          >
-            <Tabs
-              value={selectedTab}
-              onChange={(e, value) => {
-                if (typeof value === "string") setSelectedTab(value);
+        <Typography
+          sx={({ spacing }) => ({
+            width: "50%",
+            paddingTop: spacing(4),
+            fontWeight: "bold",
+          })}
+          variant="h4"
+          component="h1"
+        >
+          {dartBoardIsLoading ? <Skeleton /> : dartBoard?.name}
+        </Typography>
+        <Stack direction="row" gap={1}>
+          {dartBoardIsLoading ? (
+            <Skeleton
+              sx={{
+                width: "100%",
+                height: 64,
               }}
-              aria-label="dashboard tabs"
+            />
+          ) : (
+            <Stack
+              sx={{
+                width: "100%",
+                borderBottom: "1px solid",
+                borderColor: "grey.700",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+              direction="row"
             >
-              {Object.keys(tabs).map((tab) => {
-                return (
-                  <Tab
-                    sx={({ spacing }) => ({
-                      paddingY: spacing(3),
-                    })}
-                    key={tab}
-                    value={tab}
-                    label={tab}
-                  />
-                );
-              })}
-            </Tabs>
-            <Box>{selectedTab && tabs[selectedTab]?.extras}</Box>
-          </Stack>
-        )}
+              <Tabs
+                value={selectedTab}
+                onChange={(e, value) => {
+                  if (typeof value === "string") setSelectedTab(value);
+                }}
+                aria-label="dashboard tabs"
+              >
+                {Object.keys(tabs).map((tab) => {
+                  return (
+                    <Tab
+                      sx={({ spacing }) => ({
+                        paddingY: spacing(3),
+                      })}
+                      key={tab}
+                      value={tab}
+                      label={tab}
+                    />
+                  );
+                })}
+              </Tabs>
+              <Box>{selectedTab && tabs[selectedTab]?.extras}</Box>
+            </Stack>
+          )}
+        </Stack>
       </Stack>
-      <Box>{selectedTab && tabs[selectedTab]?.content}</Box>
+      <Box
+        sx={{
+          flexGrow: 1,
+        }}
+      >
+        {selectedTab && tabs[selectedTab]?.content}
+      </Box>
     </Stack>
   );
 };

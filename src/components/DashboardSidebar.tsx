@@ -183,6 +183,8 @@ const DashboardSidebar = ({
             sx={{
               width: 42,
               height: 42,
+              borderRadius: 2,
+              overflow: "hidden",
               position: "relative",
             }}
           >

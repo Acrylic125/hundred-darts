@@ -12,6 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import type { Dart as DartType } from "@prisma/client";
+import Image from "next/image";
 import { useState } from "react";
 import Dart from "./Dart";
 
@@ -156,7 +157,7 @@ const AllDartsContent = ({ dartBoardId }: { dartBoardId: string }) => {
             <Skeleton height={64} />
           </Grid>
         </>
-      ) : (
+      ) : darts && darts?.length > 0 ? (
         darts
           ?.sort((a, b) => {
             return b.createdAt.getTime() - a.createdAt.getTime();
@@ -211,6 +212,64 @@ const AllDartsContent = ({ dartBoardId }: { dartBoardId: string }) => {
               />
             </Grid>
           ))
+      ) : (
+        <Stack
+          sx={({ spacing }) => ({
+            width: "100%",
+            height: "100%",
+            alignItems: "center",
+            padding: spacing(8),
+          })}
+          gap={5}
+        >
+          <Box
+            sx={({ breakpoints }) => ({
+              position: "relative",
+              width: 96,
+              height: 96,
+              [breakpoints.up("md")]: {
+                width: 128,
+                height: 128,
+              },
+              [breakpoints.up("lg")]: {
+                width: 186,
+                height: 186,
+              },
+            })}
+          >
+            <Image src="/empty_blob.svg" alt="Empty Blob" fill />
+          </Box>
+          <Stack
+            sx={{
+              alignItems: "center",
+            }}
+            gap={1}
+          >
+            <Typography
+              sx={{
+                color: "grey.100",
+                fontWeight: "bold",
+                textAlign: "center",
+              }}
+              variant="h5"
+              component="h4"
+            >
+              No Darts
+            </Typography>
+            <Typography
+              sx={{
+                color: "grey.400",
+                textAlign: "center",
+              }}
+              variant="body1"
+              component="p"
+            >
+              Click “New Dart” to add a dart
+              <br />
+              to this dart board
+            </Typography>
+          </Stack>
+        </Stack>
       )}
     </Grid>
   );

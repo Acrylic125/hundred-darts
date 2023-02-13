@@ -33,7 +33,7 @@ const DartBoardLayout = <
         overflow: "auto",
       }}
       direction="column"
-      gap={2}
+      // gap={2}
     >
       <Stack
         sx={{
@@ -102,6 +102,7 @@ const DartBoardLayout = <
       </Stack>
       <Box
         sx={{
+          // display: "flex",
           flexGrow: 1,
         }}
       >

@@ -73,13 +73,36 @@ model DartBoard {
 }
 
 model Dart {
-  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @default(now()) @map("updated_at")
-  deletedAt   DateTime? @map("deleted_at")
-  text        String
-  dartBoardId String    @map("dartboard_id") @db.Uuid
-  dartBoard   DartBoard @relation(fields: [dartBoardId], references: [id], onDelete: Cascade)
+  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt         DateTime            @default(now()) @map("created_at")
+  updatedAt         DateTime            @default(now()) @map("updated_at")
+  deletedAt         DateTime?           @map("deleted_at")
+  text              String
+  dartBoardId       String              @map("dartboard_id") @db.Uuid
+  dartBoard         DartBoard           @relation(fields: [dartBoardId], references: [id], onDelete: Cascade)
+  DartTag           DartTag[]
+  AssociatedDartTag AssociatedDartTag[]
 
   @@map("darts")
+}
+
+model DartTag {
+  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  dartId            String              @map("dart_id") @db.Uuid
+  name              String
+  color             Int
+  dart              Dart                @relation(fields: [dartId], references: [id], onDelete: Cascade)
+  AssociatedDartTag AssociatedDartTag[]
+
+  @@map("dart_tags")
+}
+
+model AssociatedDartTag {
+  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  dartId    String  @map("dart_id") @db.Uuid
+  dartTagId String  @map("darttag_id") @db.Uuid
+  dart      Dart    @relation(fields: [dartId], references: [id], onDelete: Cascade)
+  dartTag   DartTag @relation(fields: [dartTagId], references: [id], onDelete: Cascade)
+
+  @@map("associated_dart_tags")
 }

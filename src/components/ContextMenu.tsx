@@ -20,12 +20,21 @@ const ContextMenu = ({
   onRequestClose: () => void;
   sections: {
     label?: string;
-    items: {
-      icon?: React.ReactNode;
-      label: string;
-      shortcut?: string;
-      onClick?: () => void;
-    }[];
+    items: (
+      | {
+          type?: "item";
+          icon?: React.ReactNode;
+          label: string;
+          shortcut?: string;
+          onClick?: () => void;
+        }
+      | {
+          type: "submenu";
+          icon?: React.ReactNode;
+          label: string;
+          subMenu: React.ReactNode;
+        }
+    )[];
   }[];
 }) => {
   return (
@@ -60,17 +69,19 @@ const ContextMenu = ({
                 <MenuItem
                   onClick={(e) => {
                     e.stopPropagation();
+                    if (item.type === "submenu") return;
                     item.onClick?.();
                   }}
                   key={item.label}
                 >
                   {item.icon && <ListItemIcon>{item.icon}</ListItemIcon>}
                   <ListItemText>{item.label}</ListItemText>
-                  {item.shortcut && (
-                    <Typography variant="body2" color="text.secondary">
-                      {item.shortcut}
-                    </Typography>
-                  )}
+                  {(item.type === undefined || item.type === "item") &&
+                    item.shortcut && (
+                      <Typography variant="body2" color="text.secondary">
+                        {item.shortcut}
+                      </Typography>
+                    )}
                 </MenuItem>
               ))}
             </Box>

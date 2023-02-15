@@ -82,6 +82,9 @@ const SubMenuItemWrapper = ({
 
   return (
     <div
+      onClick={(e) => {
+        e.stopPropagation();
+      }}
       ref={containerRef}
       onFocus={handleFocus}
       tabIndex={0}
@@ -91,8 +94,6 @@ const SubMenuItemWrapper = ({
     >
       <div ref={menuItemRef}>{menuItem}</div>
       <Menu
-        // Set pointer events to 'none' to prevent the invisible Popover div
-        // from capturing events for clicks and hovers
         style={{ pointerEvents: "none" }}
         anchorEl={menuItemRef.current}
         anchorOrigin={{

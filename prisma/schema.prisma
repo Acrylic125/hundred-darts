@@ -68,6 +68,7 @@ model DartBoard {
   userId    String    @map("user_id") @db.Uuid
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   Dart      Dart[]
+  DartTag   DartTag[]
 
   @@map("dartboards")
 }
@@ -80,7 +81,6 @@ model Dart {
   text              String
   dartBoardId       String              @map("dartboard_id") @db.Uuid
   dartBoard         DartBoard           @relation(fields: [dartBoardId], references: [id], onDelete: Cascade)
-  DartTag           DartTag[]
   AssociatedDartTag AssociatedDartTag[]
 
   @@map("darts")
@@ -88,11 +88,11 @@ model Dart {
 
 model DartTag {
   id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  dartId            String              @map("dart_id") @db.Uuid
+  dartBoardId       String              @map("dartboard_id") @db.Uuid
   name              String
   color             Int
-  dart              Dart                @relation(fields: [dartId], references: [id], onDelete: Cascade)
   AssociatedDartTag AssociatedDartTag[]
+  dartBoard         DartBoard           @relation(fields: [dartBoardId], references: [id], onDelete: Cascade)
 
   @@map("dart_tags")
 }

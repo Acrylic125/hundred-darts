@@ -1,7 +1,7 @@
 import { Box, InputBase, Typography } from "@mui/material";
 import { useRef, useState } from "react";
 import ContextMenu from "./ContextMenu";
-import DartTagsMenu from "./DartTagsMenu";
+import DartTagsMenu from "./dart-menu/DartTagsMenu";
 
 const Dart = ({
   content: _content,

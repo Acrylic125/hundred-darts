@@ -13,6 +13,7 @@ specifiers:
   '@trpc/next': ^10.9.0
   '@trpc/react-query': ^10.9.0
   '@trpc/server': ^10.9.0
+  '@types/chroma-js': ^2.1.5
   '@types/lodash': ^4.14.191
   '@types/node': ^18.11.18
   '@types/prettier': ^2.7.2
@@ -22,6 +23,7 @@ specifiers:
   '@typescript-eslint/parser': ^5.47.1
   autoprefixer: ^10.4.13
   axios: ^1.3.2
+  chroma-js: ^2.4.2
   eslint: ^8.30.0
   eslint-config-next: 13.1.6
   lexical: ^0.7.7
@@ -53,6 +55,7 @@ dependencies:
   '@trpc/react-query': 10.10.0_5mhyv2iryamqlilh5gtjpyz23q
   '@trpc/server': 10.10.0
   axios: 1.3.2
+  chroma-js: 2.4.2
   lexical: 0.7.7
   lodash: 4.17.21
   next: 13.1.6_biqbaboplfbrettd7655fr4n2y
@@ -63,6 +66,7 @@ dependencies:
   zod: 3.20.2
 
 devDependencies:
+  '@types/chroma-js': 2.1.5
   '@types/lodash': 4.14.191
   '@types/node': 18.11.19
   '@types/prettier': 2.7.2
@@ -780,6 +784,10 @@ packages:
     resolution: {integrity: sha512-tCTqcqBT+3nebYFTHtwM877qo5xQPtVlptxKdUzMVWleWT4lFTL4oddk45qVURToci2iMbVJjd4jQU9y9/XwlQ==}
     dev: false
 
+  /@types/chroma-js/2.1.5:
+    resolution: {integrity: sha512-LnJmElng1zoH7GOYqIo/EuL7L0/vEh5rc+fKaF4rsylJyjwOkX0pXeBemH25FQAWHifKJWqaRwR0EhC+yDod9A==}
+    dev: true
+
   /@types/json-schema/7.0.11:
     resolution: {integrity: sha512-wOuvG1SN4Us4rez+tylwwwCV1psiNVOkJeM3AUWUNWg/jDQY2+HE/444y5gc+jBmRqASOm2Oeh5c1axHobwRKQ==}
     dev: true
@@ -1241,6 +1249,10 @@ packages:
     optionalDependencies:
       fsevents: 2.3.2
     dev: true
+
+  /chroma-js/2.4.2:
+    resolution: {integrity: sha512-U9eDw6+wt7V8z5NncY2jJfZa+hUH8XEj8FQHgFJTrUFnJfXYf4Ml4adI2vXZOjqRDpFWtYVWypDfZwnJ+HIR4A==}
+    dev: false
 
   /client-only/0.0.1:
     resolution: {integrity: sha512-IV3Ou0jSMzZrd3pZ48nLkT9DA7Ag1pnPzaiQhpW7c3RbcqqzvzzVu+L8gfqMp/8IM2MQtSiqaCxrrcfu8I8rMA==}

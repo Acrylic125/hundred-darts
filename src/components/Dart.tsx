@@ -1,6 +1,7 @@
 import { Box, InputBase, Typography } from "@mui/material";
 import { useRef, useState } from "react";
 import ContextMenu from "./ContextMenu";
+import DartTagsMenu from "./DartTagsMenu";
 
 const Dart = ({
   content: _content,
@@ -84,20 +85,42 @@ const Dart = ({
               items: [
                 {
                   type: "submenu",
-                  label: "Attach Label",
+                  label: "Attach Tag",
                   subMenu: (
-                    <Box
-                      sx={{
-                        backgroundColor: "grey.800",
-                        padding: 2,
-                        borderRadius: 2,
-                        borderWidth: 3,
-                        borderStyle: "dashed",
-                        borderColor: "primary.500",
-                      }}
-                    >
-                      Hello
-                    </Box>
+                    <DartTagsMenu
+                      tags={[
+                        {
+                          id: "1",
+                          name: "Tag 1",
+                          color: "#FF8CBA",
+                        },
+                        {
+                          id: "2",
+                          name: "Tag 1",
+                          color: "#F0CC4C",
+                        },
+                        {
+                          id: "3",
+                          name: "Tag 1",
+                          color: "#8FFF68",
+                        },
+                        {
+                          id: "4",
+                          name: "Tag 1",
+                          color: "#8CFFFC",
+                        },
+                        {
+                          id: "5",
+                          name: "Tag 1",
+                          color: "#8CBAFF",
+                        },
+                        {
+                          id: "6",
+                          name: "Tag 1",
+                          color: "#FF8CBA",
+                        },
+                      ]}
+                    />
                   ),
                 },
               ],

@@ -78,6 +78,10 @@ const Dart = ({
                     onRequestDelete?.();
                   },
                 },
+              ],
+            },
+            {
+              items: [
                 {
                   type: "submenu",
                   label: "Attach Label",

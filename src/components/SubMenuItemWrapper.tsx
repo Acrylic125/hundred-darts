@@ -94,6 +94,11 @@ const SubMenuItemWrapper = ({
     >
       <div ref={menuItemRef}>{menuItem}</div>
       <Menu
+        sx={{
+          "& .MuiPaper-root": {
+            backgroundColor: "grey.900",
+          },
+        }}
         style={{ pointerEvents: "none" }}
         anchorEl={menuItemRef.current}
         anchorOrigin={{

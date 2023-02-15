@@ -7,6 +7,7 @@ import MenuItem from "@mui/material/MenuItem";
 import MenuList from "@mui/material/MenuList";
 import Typography from "@mui/material/Typography";
 import * as React from "react";
+import SubMenuItemWrapper from "./SubMenuItemWrapper";
 
 const ContextMenu = ({
   openState,
@@ -65,25 +66,39 @@ const ContextMenu = ({
                   {section.label}
                 </Typography>
               )}
-              {section.items.map((item) => (
-                <MenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (item.type === "submenu") return;
-                    item.onClick?.();
-                  }}
-                  key={item.label}
-                >
-                  {item.icon && <ListItemIcon>{item.icon}</ListItemIcon>}
-                  <ListItemText>{item.label}</ListItemText>
-                  {(item.type === undefined || item.type === "item") &&
-                    item.shortcut && (
-                      <Typography variant="body2" color="text.secondary">
-                        {item.shortcut}
-                      </Typography>
-                    )}
-                </MenuItem>
-              ))}
+              {section.items.map((item) =>
+                item.type === "submenu" ? (
+                  <SubMenuItemWrapper
+                    key={item.label}
+                    menuItem={
+                      <MenuItem>
+                        {item.icon && <ListItemIcon>{item.icon}</ListItemIcon>}
+                        <ListItemText>{item.label}</ListItemText>
+                      </MenuItem>
+                    }
+                    enabled={!!openState}
+                  >
+                    {item.subMenu}
+                  </SubMenuItemWrapper>
+                ) : (
+                  <MenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      item.onClick?.();
+                    }}
+                    key={item.label}
+                  >
+                    {item.icon && <ListItemIcon>{item.icon}</ListItemIcon>}
+                    <ListItemText>{item.label}</ListItemText>
+                    {(item.type === undefined || item.type === "item") &&
+                      item.shortcut && (
+                        <Typography variant="body2" color="text.secondary">
+                          {item.shortcut}
+                        </Typography>
+                      )}
+                  </MenuItem>
+                )
+              )}
             </Box>
           );
         })}

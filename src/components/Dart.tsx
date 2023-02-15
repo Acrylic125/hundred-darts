@@ -78,6 +78,24 @@ const Dart = ({
                     onRequestDelete?.();
                   },
                 },
+                {
+                  type: "submenu",
+                  label: "Attach Label",
+                  subMenu: (
+                    <Box
+                      sx={{
+                        backgroundColor: "grey.800",
+                        padding: 2,
+                        borderRadius: 2,
+                        borderWidth: 3,
+                        borderStyle: "dashed",
+                        borderColor: "primary.500",
+                      }}
+                    >
+                      Hello
+                    </Box>
+                  ),
+                },
               ],
             },
           ]}

@@ -8,6 +8,7 @@ import MenuList from "@mui/material/MenuList";
 import Typography from "@mui/material/Typography";
 import * as React from "react";
 import SubMenuItemWrapper from "./SubMenuItemWrapper";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
 const ContextMenu = ({
   openState,
@@ -56,7 +57,13 @@ const ContextMenu = ({
         {sections.map((section, sectionIndex) => {
           return (
             <Box key={sectionIndex}>
-              {sectionIndex > 0 && <Divider />}
+              {sectionIndex > 0 && (
+                <Divider
+                  sx={({ spacing }) => ({
+                    marginY: spacing(1),
+                  })}
+                />
+              )}
               {section.label && (
                 <Typography
                   variant="body2"
@@ -74,6 +81,7 @@ const ContextMenu = ({
                       <MenuItem>
                         {item.icon && <ListItemIcon>{item.icon}</ListItemIcon>}
                         <ListItemText>{item.label}</ListItemText>
+                        <ChevronRightIcon />
                       </MenuItem>
                     }
                     enabled={!!openState}

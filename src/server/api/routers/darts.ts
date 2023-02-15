@@ -1,7 +1,63 @@
 // import { Test } from "@prisma/client";
+import type { PrismaClient } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
+import type { Session } from "next-auth";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+
+async function assertDartBoardAccess({
+  session,
+  dartBoardId,
+  prisma,
+}: {
+  session?: Session;
+  dartBoardId: string;
+  prisma: PrismaClient;
+}) {
+  const dartBoard = await prisma.dartBoard.findUnique({
+    where: {
+      id: dartBoardId,
+    },
+    select: {
+      userId: true,
+    },
+  });
+  if (!dartBoard) {
+    throw new TRPCError({ code: "NOT_FOUND" });
+  }
+
+  if (!(session && session.user && session.user.id === dartBoard.userId)) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+}
+
+async function assertDartAccess({
+  session,
+  dartId,
+  prisma,
+}: {
+  session?: Session;
+  dartId: string;
+  prisma: PrismaClient;
+}) {
+  const dart = await prisma.dart.findUnique({
+    where: {
+      id: dartId,
+    },
+    select: {
+      dartBoardId: true,
+    },
+  });
+  if (!dart) {
+    throw new TRPCError({ code: "NOT_FOUND" });
+  }
+
+  await assertDartBoardAccess({
+    session,
+    dartBoardId: dart.dartBoardId,
+    prisma,
+  });
+}
 
 export const dartRouter = createTRPCRouter({
   createDart: protectedProcedure
@@ -13,27 +69,11 @@ export const dartRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const dartBoard = await ctx.prisma.dartBoard.findUnique({
-        where: {
-          id: input.dartBoardId,
-        },
-        select: {
-          userId: true,
-        },
+      await assertDartBoardAccess({
+        session: ctx.session,
+        dartBoardId: input.dartBoardId,
+        prisma: ctx.prisma,
       });
-      if (!dartBoard) {
-        return null;
-      }
-
-      if (
-        !(
-          ctx.session &&
-          ctx.session.user &&
-          ctx.session.user.id === dartBoard.userId
-        )
-      ) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
-      }
 
       const dart = await ctx.prisma.dart.create({
         data: {
@@ -51,27 +91,12 @@ export const dartRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      const dartBoard = await ctx.prisma.dartBoard.findUnique({
-        where: {
-          id: input.dartBoardId,
-        },
-        select: {
-          userId: true,
-        },
+      await assertDartBoardAccess({
+        session: ctx.session,
+        dartBoardId: input.dartBoardId,
+        prisma: ctx.prisma,
       });
-      if (!dartBoard) {
-        return null;
-      }
 
-      if (
-        !(
-          ctx.session &&
-          ctx.session.user &&
-          ctx.session.user.id === dartBoard.userId
-        )
-      ) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
-      }
       const darts = await ctx.prisma.dart.findMany({
         where: {
           dartBoardId: input.dartBoardId,
@@ -87,6 +112,12 @@ export const dartRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
+      await assertDartBoardAccess({
+        session: ctx.session,
+        dartBoardId: input.dartBoardId,
+        prisma: ctx.prisma,
+      });
+
       const dartBoardWithDarts = await ctx.prisma.dartBoard.findUnique({
         where: {
           id: input.dartBoardId,
@@ -99,15 +130,6 @@ export const dartRouter = createTRPCRouter({
         return null;
       }
 
-      if (
-        !(
-          ctx.session &&
-          ctx.session.user &&
-          ctx.session.user.id === dartBoardWithDarts.userId
-        )
-      ) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
-      }
       return dartBoardWithDarts;
     }),
   updateDart: protectedProcedure
@@ -118,39 +140,11 @@ export const dartRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const dart = await ctx.prisma.dart.findUnique({
-        where: {
-          id: input.dartId,
-        },
-        select: {
-          dartBoardId: true,
-        },
+      await assertDartAccess({
+        session: ctx.session,
+        dartId: input.dartId,
+        prisma: ctx.prisma,
       });
-      if (!dart) {
-        return null;
-      }
-
-      const dartBoard = await ctx.prisma.dartBoard.findUnique({
-        where: {
-          id: dart.dartBoardId,
-        },
-        select: {
-          userId: true,
-        },
-      });
-      if (!dartBoard) {
-        return null;
-      }
-
-      if (
-        !(
-          ctx.session &&
-          ctx.session.user &&
-          ctx.session.user.id === dartBoard.userId
-        )
-      ) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
-      }
 
       const updatedDart = await ctx.prisma.dart.update({
         where: {
@@ -170,39 +164,11 @@ export const dartRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const dart = await ctx.prisma.dart.findUnique({
-        where: {
-          id: input.dartId,
-        },
-        select: {
-          dartBoardId: true,
-        },
+      await assertDartAccess({
+        session: ctx.session,
+        dartId: input.dartId,
+        prisma: ctx.prisma,
       });
-      if (!dart) {
-        return null;
-      }
-
-      const dartBoard = await ctx.prisma.dartBoard.findUnique({
-        where: {
-          id: dart.dartBoardId,
-        },
-        select: {
-          userId: true,
-        },
-      });
-      if (!dartBoard) {
-        return null;
-      }
-
-      if (
-        !(
-          ctx.session &&
-          ctx.session.user &&
-          ctx.session.user.id === dartBoard.userId
-        )
-      ) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
-      }
 
       const deletedDart = await ctx.prisma.dart.delete({
         where: {
@@ -259,5 +225,29 @@ export const dartRouter = createTRPCRouter({
         },
       });
       return dartBoards;
+    }),
+  createDartTag: protectedProcedure
+    .input(
+      z.object({
+        name: z.string(),
+        color: z.number(),
+        dartBoardId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await assertDartBoardAccess({
+        session: ctx.session,
+        dartBoardId: input.dartBoardId,
+        prisma: ctx.prisma,
+      });
+
+      const dartTag = await ctx.prisma.dartTag.create({
+        data: {
+          name: input.name,
+          color: input.color,
+          dartBoardId: input.dartBoardId,
+        },
+      });
+      return dartTag;
     }),
 });

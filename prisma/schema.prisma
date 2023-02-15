@@ -104,5 +104,6 @@ model AssociatedDartTag {
   dart      Dart    @relation(fields: [dartId], references: [id], onDelete: Cascade)
   dartTag   DartTag @relation(fields: [dartTagId], references: [id], onDelete: Cascade)
 
+  @@unique([dartId, dartTagId])
   @@map("associated_dart_tags")
 }

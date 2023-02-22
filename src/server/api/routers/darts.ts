@@ -177,7 +177,11 @@ export const dartRouter = createTRPCRouter({
         include: {
           AssociatedDartTag: {
             include: {
-              dartTag: true,
+              dartTag: {
+                select: {
+                  id: true,
+                },
+              },
             },
           },
         },

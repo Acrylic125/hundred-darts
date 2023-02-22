@@ -4,17 +4,17 @@ import EditIcon from "@mui/icons-material/Edit";
 import { Checkbox, Chip, IconButton, Stack, Tooltip } from "@mui/material";
 import chroma from "chroma-js";
 import { useState } from "react";
-import type { PartialTag, Tag } from "./types";
+import type { Tag } from "./types";
 
 const DartMenuTag = ({
   tag,
   onRequestEditTag,
-  onRequestUpdateTag,
+  onRequestActivateTag,
   onRequestDeleteTag,
 }: {
   tag: Tag;
   onRequestEditTag?: (id: string) => void;
-  onRequestUpdateTag?: (tag: PartialTag) => void;
+  onRequestActivateTag?: (id: string, selected: boolean) => void;
   onRequestDeleteTag?: (id: string) => void;
 }) => {
   const [confirmDeleteTimeout, setConfirmDeleteTimeout] = useState<
@@ -123,10 +123,7 @@ const DartMenuTag = ({
       <Checkbox
         checked={tag.active}
         onChange={() => {
-          onRequestUpdateTag?.({
-            id: tag.id,
-            active: !tag.active,
-          });
+          onRequestActivateTag?.(tag.id, !tag.active);
         }}
       />
     </Stack>

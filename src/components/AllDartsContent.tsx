@@ -11,9 +11,9 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import type { Dart as DartType } from "@prisma/client";
+import type { Dart as DartType, DartTag } from "@prisma/client";
 import Image from "next/image";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Dart from "./Dart";
 
 const createDartSubscriber = new EventSubscriber<{
@@ -55,7 +55,12 @@ const AllDartsExtras = () => {
 
 const AllDartsContent = ({ dartBoardId }: { dartBoardId: string }) => {
   const [edittedDartId, setEdittedDartId] = useState<string | null>(null);
-  const [darts, setDarts] = useState<DartType[] | null>(null);
+  const [darts, setDarts] = useState<
+    | (DartType & {
+        selectedTags: Set<string>;
+      })[]
+    | null
+  >(null);
   const localIds = useLocalIdRemap();
   useEventSubscriber(createDartSubscriber, async ({ content }) => {
     await createDart({
@@ -63,13 +68,43 @@ const AllDartsContent = ({ dartBoardId }: { dartBoardId: string }) => {
       text: content ?? "",
     });
   });
+  const { data: allDartTags } = api.dart.getAllDartTagsForBoard.useQuery({
+    dartBoardId,
+  });
+  const dartTagsMap = useMemo(() => {
+    const map = new Map<string, DartTag>();
+    if (!allDartTags) {
+      return null;
+    }
+    allDartTags.forEach((tag) => {
+      map.set(tag.id, tag);
+    });
+    return map;
+  }, [allDartTags]);
   const { isLoading: dartsIsLoading } = api.dart.getAllDartsForBoard.useQuery(
     {
       dartBoardId,
     },
     {
+      enabled: dartTagsMap !== null,
       onSuccess: (data) => {
-        setDarts(data);
+        setDarts(
+          data.map((dart) => {
+            return {
+              dartBoardId: dart.dartBoardId,
+              createdAt: dart.createdAt,
+              deletedAt: dart.deletedAt,
+              id: dart.id,
+              text: dart.text,
+              updatedAt: dart.updatedAt,
+              selectedTags: new Set(
+                dart.AssociatedDartTag.map((tag) => {
+                  return tag.dartTagId;
+                })
+              ),
+            };
+          })
+        );
       },
     }
   );
@@ -90,6 +125,7 @@ const AllDartsContent = ({ dartBoardId }: { dartBoardId: string }) => {
             createdAt: new Date(),
             updatedAt: new Date(),
             deletedAt: null,
+            selectedTags: new Set(),
           },
         ];
       });
@@ -148,6 +184,9 @@ const AllDartsContent = ({ dartBoardId }: { dartBoardId: string }) => {
       });
     },
   });
+  // const {} = api.dart.createDartTag.useMutation({
+  //   onSuccess: (dart) => {},
+  // });
 
   if (!dartsIsLoading && darts && darts.length === 0) {
     return (
@@ -277,6 +316,16 @@ const AllDartsContent = ({ dartBoardId }: { dartBoardId: string }) => {
                 }}
                 editMode={edittedDartId === dart.id}
                 autoFocusOnEdit
+                tags={
+                  allDartTags?.map((tag) => {
+                    return {
+                      id: tag.id,
+                      color: tag.color,
+                      name: tag.name,
+                      active: dart.selectedTags.has(tag.id),
+                    };
+                  }) ?? []
+                }
               />
             </Grid>
           ))

@@ -2,6 +2,7 @@ import { Box, InputBase, Typography } from "@mui/material";
 import { useRef, useState } from "react";
 import ContextMenu from "./ContextMenu";
 import DartTagsMenu from "./dart-menu/DartTagsMenu";
+import type { Tag } from "./dart-menu/types";
 
 const Dart = ({
   content: _content,
@@ -12,6 +13,7 @@ const Dart = ({
   onRequestClose,
   editMode,
   autoFocusOnEdit,
+  tags,
 }: {
   content: string;
   onRequestEdit?: () => void;
@@ -19,8 +21,15 @@ const Dart = ({
   onRequestSave?: (content: string) => void;
   onRequestDuplicate?: (content: string) => void;
   onRequestClose?: () => void;
+  onRequestCreateTag?: (tag: { name: string; color: string }) => void;
+  onRequestUpdateTag?: (tag: {
+    id: string;
+    name: string;
+    color: string;
+  }) => void;
   editMode?: boolean;
   autoFocusOnEdit?: boolean;
+  tags?: Tag[];
 }) => {
   const [contextMenu, setContextMenu] = useState<{
     top: number;
@@ -86,42 +95,7 @@ const Dart = ({
                 {
                   type: "submenu",
                   label: "Attach Tag",
-                  subMenu: (
-                    <DartTagsMenu
-                      tags={[
-                        {
-                          id: "1",
-                          name: "Tag 1",
-                          color: "#FF8CBA",
-                        },
-                        {
-                          id: "2",
-                          name: "Tag 1",
-                          color: "#F0CC4C",
-                        },
-                        {
-                          id: "3",
-                          name: "Tag 1",
-                          color: "#8FFF68",
-                        },
-                        {
-                          id: "4",
-                          name: "Tag 1",
-                          color: "#8CFFFC",
-                        },
-                        {
-                          id: "5",
-                          name: "Tag 1",
-                          color: "#8CBAFF",
-                        },
-                        {
-                          id: "6",
-                          name: "Tag 1",
-                          color: "#FF8CBA",
-                        },
-                      ]}
-                    />
-                  ),
+                  subMenu: <DartTagsMenu tags={tags ?? []} />,
                 },
               ],
             },

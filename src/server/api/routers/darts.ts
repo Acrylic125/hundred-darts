@@ -4,6 +4,7 @@ import { TRPCError } from "@trpc/server";
 import type { Session } from "next-auth";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+import type { Prisma } from "@prisma/client";
 
 async function assertDartBoardAccess({
   session,
@@ -29,6 +30,10 @@ async function assertDartBoardAccess({
   if (!(session && session.user && session.user.id === dartBoard.userId)) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
+
+  return {
+    dartBoard,
+  };
 }
 
 async function assertDartAccess({
@@ -57,6 +62,74 @@ async function assertDartAccess({
     dartBoardId: dart.dartBoardId,
     prisma,
   });
+
+  return {
+    dart,
+  };
+}
+
+async function assertDartTagAccess({
+  session,
+  dartTagId,
+  prisma,
+}: {
+  session?: Session;
+  dartTagId: string;
+  prisma: PrismaClient;
+}) {
+  const dartTag = await prisma.dartTag.findUnique({
+    where: {
+      id: dartTagId,
+    },
+    select: {
+      dartBoardId: true,
+    },
+  });
+  if (!dartTag) {
+    throw new TRPCError({ code: "NOT_FOUND" });
+  }
+
+  await assertDartBoardAccess({
+    session,
+    dartBoardId: dartTag.dartBoardId,
+    prisma,
+  });
+
+  return {
+    dartTag,
+  };
+}
+
+async function assertAssociatedDartTagAccess({
+  session,
+  associatedDartTagId,
+  prisma,
+}: {
+  session?: Session;
+  associatedDartTagId: string;
+  prisma: PrismaClient;
+}) {
+  const associatedDartTag = await prisma.associatedDartTag.findUnique({
+    where: {
+      id: associatedDartTagId,
+    },
+    select: {
+      dartId: true,
+    },
+  });
+  if (!associatedDartTag) {
+    throw new TRPCError({ code: "NOT_FOUND" });
+  }
+
+  await assertDartAccess({
+    session,
+    dartId: associatedDartTag.dartId,
+    prisma,
+  });
+
+  return {
+    associatedDartTag,
+  };
 }
 
 export const dartRouter = createTRPCRouter({
@@ -101,7 +174,15 @@ export const dartRouter = createTRPCRouter({
         where: {
           dartBoardId: input.dartBoardId,
         },
+        include: {
+          AssociatedDartTag: {
+            include: {
+              dartTag: true,
+            },
+          },
+        },
       });
+
       return darts;
     }),
   getDartBoard: protectedProcedure
@@ -249,5 +330,79 @@ export const dartRouter = createTRPCRouter({
         },
       });
       return dartTag;
+    }),
+  getAllDartTagsForBoard: protectedProcedure
+    .input(
+      z.object({
+        dartBoardId: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      await assertDartBoardAccess({
+        session: ctx.session,
+        dartBoardId: input.dartBoardId,
+        prisma: ctx.prisma,
+      });
+
+      const dartTags = await ctx.prisma.dartTag.findMany({
+        where: {
+          dartBoardId: input.dartBoardId,
+        },
+      });
+      return dartTags;
+    }),
+  associateDartTagWithDart: protectedProcedure
+    .input(
+      z.object({
+        dartId: z.string(),
+        dartTagId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { dart } = await assertDartAccess({
+        session: ctx.session,
+        dartId: input.dartId,
+        prisma: ctx.prisma,
+      });
+      const { dartTag } = await assertDartTagAccess({
+        session: ctx.session,
+        dartTagId: input.dartTagId,
+        prisma: ctx.prisma,
+      });
+      if (dart.dartBoardId !== dartTag.dartBoardId) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Dart and dart tag must be on the same dart board",
+        });
+      }
+
+      const associatedDartTag = await ctx.prisma.associatedDartTag.create({
+        data: {
+          dartId: input.dartId,
+          dartTagId: input.dartTagId,
+        },
+      });
+      return associatedDartTag;
+    }),
+  disassociatedDartTag: protectedProcedure
+    .input(
+      z.object({
+        associatedDartTagId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await assertAssociatedDartTagAccess({
+        session: ctx.session,
+        associatedDartTagId: input.associatedDartTagId,
+        prisma: ctx.prisma,
+      });
+
+      const deletedAssociatedDartTag =
+        await ctx.prisma.associatedDartTag.delete({
+          where: {
+            id: input.associatedDartTagId,
+          },
+        });
+      return deletedAssociatedDartTag;
     }),
 });

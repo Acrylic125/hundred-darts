@@ -62,10 +62,11 @@ const DashboardSidebar = ({
         }}
       />
       <Stack
-        sx={({ spacing }) => ({
+        sx={{
           position: "relative",
-          paddingX: spacing(2),
-        })}
+          borderRight: "2px solid",
+          borderColor: "grey.800",
+        }}
         gap={1}
         direction="column"
       >
@@ -73,8 +74,11 @@ const DashboardSidebar = ({
           sx={({ spacing }) => ({
             position: "sticky",
             paddingTop: spacing(4),
+            paddingBottom: spacing(1),
             top: 0,
             zIndex: 1,
+            borderBottom: "2px solid",
+            borderColor: "grey.800",
           })}
           bgcolor="grey.900"
           gap={1}
@@ -104,14 +108,14 @@ const DashboardSidebar = ({
             <Typography
               sx={{
                 fontWeight: "bold",
-                color: "grey.300",
+                color: "grey.500",
               }}
               variant="body1"
               component="h2"
             >
               Dart Boards
             </Typography>
-            <Button
+            {/* <Button
               onClick={() => {
                 setCreateDartBoardModal(true);
               }}
@@ -120,9 +124,9 @@ const DashboardSidebar = ({
               size="medium"
             >
               Create
-            </Button>
+            </Button> */}
           </Stack>
-          <Box
+          {/* <Box
             sx={({ shadows }) => ({
               backgroundColor: "grey.800",
               borderRadius: 2,
@@ -138,7 +142,7 @@ const DashboardSidebar = ({
               name="Search Dart Board"
               fullWidth
             />
-          </Box>
+          </Box> */}
         </Stack>
         {dartBoards !== undefined && dartBoards.length > 0 ? (
           <List>

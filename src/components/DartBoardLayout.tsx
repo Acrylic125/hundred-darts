@@ -46,17 +46,18 @@ const DartBoardLayout = <
         gap={2}
       >
         <Typography
-          sx={({ spacing }) => ({
+          sx={{
             width: "50%",
-            paddingTop: spacing(4),
             fontWeight: "bold",
-          })}
-          variant="h4"
+            paddingTop: ({ spacing }) => spacing(4),
+            paddingX: ({ spacing }) => spacing(4),
+          }}
+          variant="h5"
           component="h1"
         >
           {dartBoardIsLoading ? <Skeleton /> : dartBoard?.name}
         </Typography>
-        <Stack direction="row" gap={1}>
+        {/* <Stack direction="row" gap={1}>
           {dartBoardIsLoading ? (
             <Skeleton
               sx={{
@@ -98,7 +99,7 @@ const DartBoardLayout = <
               <Box>{selectedTab && tabs[selectedTab]?.extras}</Box>
             </Stack>
           )}
-        </Stack>
+        </Stack> */}
       </Stack>
       <Box
         sx={{

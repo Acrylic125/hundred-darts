@@ -1,16 +1,15 @@
 import { api } from "@/utils/api";
 import ClearIcon from "@mui/icons-material/Clear";
 import type { SxProps, Theme } from "@mui/material";
-import { useMediaQuery } from "@mui/material";
 import {
-  useTheme,
   Box,
   Button,
-  InputBase,
   List,
   ListItemButton,
   Stack,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import type { Session } from "next-auth";
 import Image from "next/image";

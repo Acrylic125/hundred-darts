@@ -1,7 +1,9 @@
 import { api } from "@/utils/api";
 import ClearIcon from "@mui/icons-material/Clear";
 import type { SxProps, Theme } from "@mui/material";
+import { useMediaQuery } from "@mui/material";
 import {
+  useTheme,
   Box,
   Button,
   InputBase,
@@ -32,6 +34,9 @@ const DashboardSidebar = ({
   onCollapse?: () => void;
   userId: string;
 }) => {
+  const theme = useTheme();
+  const isAboveLg = useMediaQuery(theme.breakpoints.up("lg"));
+  const padScaleFactor = isAboveLg ? 2 : 1;
   const utils = api.useContext();
   const [createDartBoardModal, setCreateDartBoardModal] = useState(false);
   const { data: dartBoards } = api.dart.getAllDartBoards.useQuery({
@@ -103,7 +108,7 @@ const DashboardSidebar = ({
           <Stack
             direction="row"
             sx={{
-              paddingX: ({ spacing }) => spacing(2),
+              paddingX: ({ spacing }) => spacing(2 * padScaleFactor),
             }}
             gap={2}
             alignItems="center"
@@ -124,13 +129,13 @@ const DashboardSidebar = ({
         {dartBoards !== undefined && dartBoards.length > 0 ? (
           <List
             sx={{
-              paddingX: ({ spacing }) => spacing(1),
+              paddingX: ({ spacing }) => spacing(1 * padScaleFactor),
             }}
           >
             <Box
               sx={{
-                paddingX: ({ spacing }) => spacing(1),
-                marginBottom: ({ spacing }) => spacing(1),
+                paddingX: ({ spacing }) => spacing(1 * padScaleFactor),
+                marginBottom: ({ spacing }) => spacing(2),
               }}
             >
               <Button
@@ -156,6 +161,9 @@ const DashboardSidebar = ({
                     sx={{
                       borderRadius: 2,
                       "&.Mui-selected": {
+                        backgroundColor: "grey.800",
+                      },
+                      "&.Mui-selected:focus": {
                         backgroundColor: "grey.800",
                       },
                     }}
@@ -186,7 +194,7 @@ const DashboardSidebar = ({
             alignItems: "center",
             borderTop: "2px solid",
             borderColor: "grey.800",
-            paddingX: ({ spacing }) => spacing(2),
+            paddingX: ({ spacing }) => spacing(2 * padScaleFactor),
           }}
           gap={2}
           direction="row"

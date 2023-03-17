@@ -66,6 +66,7 @@ const DashboardSidebar = ({
           position: "relative",
           borderRight: "2px solid",
           borderColor: "grey.800",
+          minHeight: "100vh",
         }}
         gap={1}
         direction="column"
@@ -185,6 +186,7 @@ const DashboardSidebar = ({
             alignItems: "center",
             borderTop: "2px solid",
             borderColor: "grey.800",
+            paddingX: ({ spacing }) => spacing(2),
           }}
           gap={2}
           direction="row"

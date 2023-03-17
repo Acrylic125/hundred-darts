@@ -129,6 +129,7 @@ const DashboardSidebar = ({
             <Box
               sx={{
                 paddingX: ({ spacing }) => spacing(1),
+                marginBottom: ({ spacing }) => spacing(1),
               }}
             >
               <Button
@@ -151,6 +152,12 @@ const DashboardSidebar = ({
                 return (
                   <ListItemButton
                     key={dartBoard.id}
+                    sx={{
+                      borderRadius: 2,
+                      "&.Mui-selected": {
+                        backgroundColor: "grey.800",
+                      },
+                    }}
                     onClick={() => {
                       onSelectDartBoard?.(dartBoard.id);
                     }}
@@ -176,6 +183,8 @@ const DashboardSidebar = ({
             bottom: 0,
             zIndex: 1,
             alignItems: "center",
+            borderTop: "2px solid",
+            borderColor: "grey.800",
           }}
           gap={2}
           direction="row"

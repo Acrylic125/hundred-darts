@@ -15,6 +15,11 @@ import "../styles/globals.css";
 import { api } from "../utils/api";
 
 let theme = createTheme({
+  typography: {
+    button: {
+      textTransform: "none",
+    },
+  },
   palette: {
     mode: "dark",
     primary: {

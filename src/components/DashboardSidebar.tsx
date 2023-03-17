@@ -101,6 +101,9 @@ const DashboardSidebar = ({
           )}
           <Stack
             direction="row"
+            sx={{
+              paddingX: ({ spacing }) => spacing(2),
+            }}
             gap={2}
             alignItems="center"
             justifyContent="space-between"
@@ -115,37 +118,31 @@ const DashboardSidebar = ({
             >
               Dart Boards
             </Typography>
-            {/* <Button
-              onClick={() => {
-                setCreateDartBoardModal(true);
-              }}
-              variant="contained"
-              color="primary"
-              size="medium"
-            >
-              Create
-            </Button> */}
           </Stack>
-          {/* <Box
-            sx={({ shadows }) => ({
-              backgroundColor: "grey.800",
-              borderRadius: 2,
-              boxShadow: shadows[4],
-            })}
-          >
-            <InputBase
-              sx={({ spacing }) => ({
-                color: "grey.300",
-                padding: spacing(1, 2),
-              })}
-              placeholder="Search Dart Board"
-              name="Search Dart Board"
-              fullWidth
-            />
-          </Box> */}
         </Stack>
         {dartBoards !== undefined && dartBoards.length > 0 ? (
-          <List>
+          <List
+            sx={{
+              paddingX: ({ spacing }) => spacing(1),
+            }}
+          >
+            <Box
+              sx={{
+                paddingX: ({ spacing }) => spacing(1),
+              }}
+            >
+              <Button
+                fullWidth
+                sx={{
+                  boxShadow: "none",
+                  backgroundColor: "grey.700",
+                }}
+                variant="contained"
+              >
+                Create Dart Board
+              </Button>
+            </Box>
+
             {dartBoards
               .sort((a, b) => {
                 return b.createdAt.getTime() - a.createdAt.getTime();

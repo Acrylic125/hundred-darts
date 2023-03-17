@@ -251,86 +251,106 @@ const AllDartsContent = ({ dartBoardId }: { dartBoardId: string }) => {
   }
 
   return (
-    <Grid
-      sx={({ spacing }) => ({
-        paddingY: spacing(2),
-      })}
-      spacing={2}
-      container
-    >
-      {dartsIsLoading ? (
-        <>
-          <Grid item xs={12}>
-            <Skeleton height={64} />
-          </Grid>
-        </>
-      ) : (
-        darts
-          ?.sort((a, b) => {
-            return b.createdAt.getTime() - a.createdAt.getTime();
-          })
-          .map((dart) => (
-            <Grid key={dart.id} item xs={12} sm={6} lg={4}>
-              <Dart
-                content={dart.text}
-                onRequestEdit={() => {
-                  setEdittedDartId(dart.id);
-                }}
-                onRequestDelete={() => {
-                  const runDeleteDart = (id: string) => {
-                    void deleteDart({
-                      dartId: id,
-                    });
-                  };
-
-                  if (localIds.isLocalId(dart.id)) {
-                    localIds.runForBounded(dart.id, (boundedId) => {
-                      runDeleteDart(boundedId);
-                    });
-                    return;
-                  }
-                  runDeleteDart(dart.id);
-                }}
-                onRequestDuplicate={(text) => {
-                  void createDart({
-                    dartBoardId,
-                    text,
-                  });
-                }}
-                onRequestClose={() => {
-                  setEdittedDartId(null);
-                }}
-                onRequestSave={(content) => {
-                  const runUpdateDart = (id: string) => {
-                    void updateDart({
-                      dartId: id,
-                      text: content,
-                    });
-                  };
-
-                  if (localIds.isLocalId(dart.id)) {
-                    localIds.runForBounded(dart.id, runUpdateDart);
-                    return;
-                  }
-                  runUpdateDart(dart.id);
-                }}
-                editMode={edittedDartId === dart.id}
-                autoFocusOnEdit
-                tags={
-                  allDartTags?.map((tag) => {
-                    return {
-                      id: tag.id,
-                      color: tag.color,
-                      name: tag.name,
-                      active: dart.selectedTags.has(tag.id),
-                    };
-                  }) ?? []
-                }
-              />
+    <Stack>
+      <Stack
+        sx={{
+          borderBottom: "2px solid",
+          borderColor: "grey.800",
+          padding: ({ spacing }) => spacing(1, 2),
+        }}
+      >
+        <Typography
+          sx={{
+            fontWeight: "bold",
+            color: "grey.500",
+          }}
+          variant="body1"
+          component="h2"
+        >
+          Darts
+        </Typography>
+      </Stack>
+      <Grid
+        sx={({ spacing }) => ({
+          paddingY: spacing(2),
+        })}
+        spacing={2}
+        container
+      >
+        {dartsIsLoading ? (
+          <>
+            <Grid item xs={12}>
+              <Skeleton height={64} />
             </Grid>
-          ))
-      )}
-    </Grid>
+          </>
+        ) : (
+          darts
+            ?.sort((a, b) => {
+              return b.createdAt.getTime() - a.createdAt.getTime();
+            })
+            .map((dart) => (
+              <Grid key={dart.id} item xs={12} sm={6} lg={4}>
+                <Dart
+                  content={dart.text}
+                  onRequestEdit={() => {
+                    setEdittedDartId(dart.id);
+                  }}
+                  onRequestDelete={() => {
+                    const runDeleteDart = (id: string) => {
+                      void deleteDart({
+                        dartId: id,
+                      });
+                    };
+
+                    if (localIds.isLocalId(dart.id)) {
+                      localIds.runForBounded(dart.id, (boundedId) => {
+                        runDeleteDart(boundedId);
+                      });
+                      return;
+                    }
+                    runDeleteDart(dart.id);
+                  }}
+                  onRequestDuplicate={(text) => {
+                    void createDart({
+                      dartBoardId,
+                      text,
+                    });
+                  }}
+                  onRequestClose={() => {
+                    setEdittedDartId(null);
+                  }}
+                  onRequestSave={(content) => {
+                    const runUpdateDart = (id: string) => {
+                      void updateDart({
+                        dartId: id,
+                        text: content,
+                      });
+                    };
+
+                    if (localIds.isLocalId(dart.id)) {
+                      localIds.runForBounded(dart.id, runUpdateDart);
+                      return;
+                    }
+                    runUpdateDart(dart.id);
+                  }}
+                  editMode={edittedDartId === dart.id}
+                  autoFocusOnEdit
+                  tags={
+                    allDartTags?.map((tag) => {
+                      return {
+                        id: tag.id,
+                        color: tag.color,
+                        name: tag.name,
+                        active: dart.selectedTags.has(tag.id),
+                      };
+                    }) ?? []
+                  }
+                />
+              </Grid>
+            ))
+        )}
+      </Grid>
+    </Stack>
   );
 };
 

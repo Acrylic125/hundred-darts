@@ -3,7 +3,7 @@ import { Box, IconButton, InputBase, Menu, Stack } from "@mui/material";
 import chroma from "chroma-js";
 import { useRef, useState } from "react";
 import { SketchPicker } from "react-color";
-import type { PartialTag, Tag } from "./types";
+import type { EditablePartialTag, Tag } from "./types";
 
 const EditDartMenuTag = ({
   tag,
@@ -11,8 +11,8 @@ const EditDartMenuTag = ({
   onRequestDoneEditTag,
 }: {
   tag: Tag;
-  onRequestUpdateTag?: (tag: PartialTag) => void;
-  onRequestDoneEditTag?: (tag: PartialTag) => void;
+  onRequestUpdateTag?: (tag: EditablePartialTag) => void;
+  onRequestDoneEditTag?: (tag: EditablePartialTag) => void;
 }) => {
   const [colorPickerMenu, setColorPickerMenu] = useState<boolean>(false);
   const [name, setName] = useState<string>(tag.name);
@@ -85,7 +85,6 @@ const EditDartMenuTag = ({
         }}
         autoFocus
         onBlur={() => {
-          console.log("blur name");
           onRequestUpdateTag?.({
             id: tag.id,
             name,

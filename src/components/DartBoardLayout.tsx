@@ -57,49 +57,6 @@ const DartBoardLayout = <
         >
           {dartBoardIsLoading ? <Skeleton /> : dartBoard?.name}
         </Typography>
-        {/* <Stack direction="row" gap={1}>
-          {dartBoardIsLoading ? (
-            <Skeleton
-              sx={{
-                width: "100%",
-                height: 64,
-              }}
-            />
-          ) : (
-            <Stack
-              sx={{
-                width: "100%",
-                borderBottom: "1px solid",
-                borderColor: "grey.700",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-              direction="row"
-            >
-              <Tabs
-                value={selectedTab}
-                onChange={(e, value) => {
-                  if (typeof value === "string") setSelectedTab(value);
-                }}
-                aria-label="dashboard tabs"
-              >
-                {Object.keys(tabs).map((tab) => {
-                  return (
-                    <Tab
-                      sx={({ spacing }) => ({
-                        paddingY: spacing(3),
-                      })}
-                      key={tab}
-                      value={tab}
-                      label={tab}
-                    />
-                  );
-                })}
-              </Tabs>
-              <Box>{selectedTab && tabs[selectedTab]?.extras}</Box>
-            </Stack>
-          )}
-        </Stack> */}
       </Stack>
       <Box
         sx={{

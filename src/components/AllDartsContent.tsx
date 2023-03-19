@@ -5,6 +5,7 @@ import useLocalIdRemap from "@/utils/useLocalIdRemap";
 import {
   Box,
   Button,
+  Container,
   Grid,
   InputBase,
   Skeleton,
@@ -269,12 +270,7 @@ const AllDartsContent = ({ dartBoardId }: { dartBoardId: string }) => {
   }
 
   return (
-    <Stack>
-      <Stack
-        sx={{
-          padding: ({ spacing }) => spacing(1, 2),
-        }}
-      ></Stack>
+    <Container maxWidth="xl">
       <Grid
         sx={({ spacing }) => ({
           paddingY: spacing(2),
@@ -294,7 +290,7 @@ const AllDartsContent = ({ dartBoardId }: { dartBoardId: string }) => {
               return b.createdAt.getTime() - a.createdAt.getTime();
             })
             .map((dart) => (
-              <Grid key={dart.id} item xs={12} sm={6} lg={4}>
+              <Grid key={dart.id} item xs={12} sm={6} lg={4} xl={3}>
                 <Dart
                   content={dart.text}
                   onRequestEdit={() => {
@@ -355,7 +351,7 @@ const AllDartsContent = ({ dartBoardId }: { dartBoardId: string }) => {
             ))
         )}
       </Grid>
-    </Stack>
+    </Container>
   );
 };
 

@@ -22,7 +22,25 @@ const createDartSubscriber = new EventSubscriber<{
 
 const AllDartsExtras = () => {
   return (
-    <Stack direction="row" gap={1}>
+    <Stack
+      sx={{
+        justifyContent: "space-between",
+        alignItems: "flex-end",
+        paddingY: ({ spacing }) => spacing(2),
+      }}
+      direction="row"
+      gap={1}
+    >
+      <Typography
+        sx={{
+          fontWeight: "bold",
+          color: "grey.500",
+        }}
+        variant="body1"
+        component="h2"
+      >
+        Darts
+      </Typography>
       <Stack direction="row" gap={1}>
         <Box
           sx={() => ({
@@ -254,22 +272,9 @@ const AllDartsContent = ({ dartBoardId }: { dartBoardId: string }) => {
     <Stack>
       <Stack
         sx={{
-          borderBottom: "2px solid",
-          borderColor: "grey.800",
           padding: ({ spacing }) => spacing(1, 2),
         }}
-      >
-        <Typography
-          sx={{
-            fontWeight: "bold",
-            color: "grey.500",
-          }}
-          variant="body1"
-          component="h2"
-        >
-          Darts
-        </Typography>
-      </Stack>
+      ></Stack>
       <Grid
         sx={({ spacing }) => ({
           paddingY: spacing(2),

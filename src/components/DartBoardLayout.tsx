@@ -2,24 +2,15 @@ import { useState } from "react";
 import { api } from "@/utils/api";
 import { Skeleton, Stack, Tabs, Tab, Typography, Box } from "@mui/material";
 
-const DartBoardLayout = <
-  T extends Record<
-    string,
-    {
-      content: React.ReactNode;
-      extras?: React.ReactNode;
-    }
-  >
->({
+const DartBoardLayout = ({
   dartBoardId,
-  defaultSelectedTab,
-  tabs,
+  topBar,
+  children,
 }: {
   dartBoardId: string;
-  defaultSelectedTab: keyof T;
-  tabs: T;
+  topBar?: React.ReactNode;
+  children?: React.ReactNode;
 }) => {
-  const [selectedTab, setSelectedTab] = useState(defaultSelectedTab);
   const { data: dartBoard, isLoading: dartBoardIsLoading } =
     api.dart.getDartBoard.useQuery({
       dartBoardId,
@@ -33,30 +24,31 @@ const DartBoardLayout = <
         overflow: "auto",
       }}
       direction="column"
-      // gap={2}
     >
       <Stack
         sx={{
           position: "sticky",
           top: 0,
+          paddingTop: ({ spacing }) => spacing(4),
+          paddingX: ({ spacing }) => spacing(4),
+          borderBottom: "2px solid",
+          borderColor: "grey.800",
           backgroundColor: "grey.900",
           zIndex: 1,
         }}
         direction="column"
-        gap={2}
       >
         <Typography
           sx={{
             width: "50%",
             fontWeight: "bold",
-            paddingTop: ({ spacing }) => spacing(4),
-            paddingX: ({ spacing }) => spacing(4),
           }}
           variant="h5"
           component="h1"
         >
           {dartBoardIsLoading ? <Skeleton /> : dartBoard?.name}
         </Typography>
+        {topBar}
       </Stack>
       <Box
         sx={{
@@ -64,7 +56,7 @@ const DartBoardLayout = <
           flexGrow: 1,
         }}
       >
-        {selectedTab && tabs[selectedTab]?.content}
+        {children}
       </Box>
     </Stack>
   );

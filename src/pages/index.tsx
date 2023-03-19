@@ -1,10 +1,17 @@
 import { type NextPage } from "next";
 import { useSession } from "next-auth/react";
 import { api } from "../utils/api";
-import { Editable, Slate, withReact } from "slate-react";
+import {
+  Editable,
+  Slate,
+  withReact,
+  type RenderElementProps,
+  type RenderLeafProps,
+} from "slate-react";
 
 import type { Descendant, Editor } from "slate";
 import { createEditor } from "slate";
+import type { ReactNode } from "react";
 import { useMemo } from "react";
 import { DefaultElement } from "slate-react";
 
@@ -12,41 +19,45 @@ function useEditorConfig(editor: Editor) {
   return { renderElement, renderLeaf };
 }
 
-function renderElement(props) {
+function renderElement(props: RenderElementProps) {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const { element, children, attributes } = props;
-  switch (element.type) {
-    case "paragraph":
-      return <p {...attributes}>{children}</p>;
-    case "h1":
-      return <h1 {...attributes}>{children}</h1>;
-    case "h2":
-      return <h2 {...attributes}>{children}</h2>;
-    case "h3":
-      return <h3 {...attributes}>{children}</h3>;
-    case "h4":
-      return <h4 {...attributes}>{children}</h4>;
-    default:
-      // For the default case, we delegate to Slate's default rendering.
-      return <DefaultElement {...props} />;
+  if ("type" in element && typeof element.type === "string") {
+    switch (element.type) {
+      case "paragraph":
+        return <p {...attributes}>{children}</p>;
+      case "h1":
+        return <h1 {...attributes}>{children}</h1>;
+      case "h2":
+        return <h2 {...attributes}>{children}</h2>;
+      case "h3":
+        return <h3 {...attributes}>{children}</h3>;
+      case "h4":
+        return <h4 {...attributes}>{children}</h4>;
+      default:
+        // For the default case, we delegate to Slate's default rendering.
+        return <DefaultElement {...props} />;
+    }
   }
+  return <DefaultElement {...props} />;
 }
 
-function renderLeaf({ attributes, children, leaf }) {
+function renderLeaf({ attributes, children, leaf }: RenderLeafProps) {
   let el = <>{children}</>;
 
-  if (leaf.bold) {
+  if ("bold" in leaf && leaf.bold) {
     el = <strong>{el}</strong>;
   }
 
-  if (leaf.code) {
+  if ("code" in leaf && leaf.code) {
     el = <code>{el}</code>;
   }
 
-  if (leaf.italic) {
+  if ("italic" in leaf && leaf.italic) {
     el = <em>{el}</em>;
   }
 
-  if (leaf.underline) {
+  if ("underline" in leaf && leaf.underline) {
     el = <u>{el}</u>;
   }
 

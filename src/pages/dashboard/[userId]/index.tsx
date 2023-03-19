@@ -3,6 +3,7 @@ import DartBoardLayout from "@/components/DartBoardLayout";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import {
   Container,
+  Box,
   Modal,
   Stack,
   useMediaQuery,
@@ -34,19 +35,19 @@ const Dashboard = () => {
   }
 
   return (
-    <Container maxWidth="xl">
-      <Stack direction="row" gap={4}>
+    <Box>
+      <Stack direction="row" gap={0}>
         {isGreaterThanMd ? (
           <DashboardSidebar
             user={data?.user}
             selectedDartBoardId={selectedDartBoardId}
             onSelectDartBoard={setSelectedDartBoardId}
             sx={({ breakpoints }) => ({
-              width: 320,
+              width: 420,
               height: "100vh",
               overflowY: "auto",
               [breakpoints.up("lg")]: {
-                width: 360,
+                width: 480,
               },
             })}
             userId={data?.user?.id || ""}
@@ -88,24 +89,18 @@ const Dashboard = () => {
         >
           {selectedDartBoardId && (
             <DartBoardLayout
-              defaultSelectedTab="all"
               dartBoardId={selectedDartBoardId}
-              tabs={{
-                all: {
-                  content: (
-                    <AllDartsContent
-                      key={selectedDartBoardId}
-                      dartBoardId={selectedDartBoardId}
-                    />
-                  ),
-                  extras: <AllDartsExtras />,
-                },
-              }}
-            />
+              topBar={<AllDartsExtras />}
+            >
+              <AllDartsContent
+                key={selectedDartBoardId}
+                dartBoardId={selectedDartBoardId}
+              />
+            </DartBoardLayout>
           )}
         </Stack>
       </Stack>
-    </Container>
+    </Box>
   );
 };
 

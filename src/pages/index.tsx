@@ -14,6 +14,7 @@ import { createEditor } from "slate";
 import type { ReactNode } from "react";
 import { useMemo } from "react";
 import { DefaultElement } from "slate-react";
+import { Typography } from "@mui/material";
 
 function useEditorConfig(editor: Editor) {
   return { renderElement, renderLeaf };
@@ -25,9 +26,27 @@ function renderElement(props: RenderElementProps) {
   if ("type" in element && typeof element.type === "string") {
     switch (element.type) {
       case "paragraph":
-        return <p {...attributes}>{children}</p>;
+        return (
+          <Typography
+            sx={{
+              color: "grey.100",
+            }}
+            {...attributes}
+          >
+            {children}
+          </Typography>
+        );
       case "h1":
-        return <h1 {...attributes}>{children}</h1>;
+        <Typography
+          variant="h1"
+          component="h1"
+          sx={{
+            color: "grey.100",
+          }}
+          {...attributes}
+        >
+          {children}
+        </Typography>;
       case "h2":
         return <h2 {...attributes}>{children}</h2>;
       case "h3":
@@ -43,25 +62,23 @@ function renderElement(props: RenderElementProps) {
 }
 
 function renderLeaf({ attributes, children, leaf }: RenderLeafProps) {
-  let el = <>{children}</>;
-
-  if ("bold" in leaf && leaf.bold) {
-    el = <strong>{el}</strong>;
-  }
-
-  if ("code" in leaf && leaf.code) {
-    el = <code>{el}</code>;
-  }
-
-  if ("italic" in leaf && leaf.italic) {
-    el = <em>{el}</em>;
-  }
-
-  if ("underline" in leaf && leaf.underline) {
-    el = <u>{el}</u>;
-  }
-
-  return <span {...attributes}>{el}</span>;
+  return (
+    <span {...attributes}>
+      <Typography
+        component="p"
+        sx={{
+          display: "inline",
+          color: "grey.100",
+          fontWeight: "bold" in leaf && leaf.bold ? "bold" : undefined,
+          textDecoration:
+            "underline" in leaf && leaf.underline ? "underline" : undefined,
+        }}
+        {...attributes}
+      >
+        {children}
+      </Typography>
+    </span>
+  );
 }
 
 const ExampleDocument = [
